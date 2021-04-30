@@ -18,7 +18,7 @@
  * Credit enrolment plugin.
  *
  * @package    enrol_credit
- * @copyright  2018 bdecent gmbh <https://bdecent.de>
+ * @copyright  2021 bdecent gmbh <https://bdecent.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -172,7 +172,7 @@ class enrol_credit_plugin extends enrol_plugin {
      */
     public function enrol_self(stdClass $instance, \stdClass $user, $data = null) {
 
-        $this->deduct_credits($user->id, $instance);
+        self::deduct_credits($user->id, $instance->customint7);
 
         $timestart = time();
         if ($instance->enrolperiod) {
@@ -298,10 +298,10 @@ class enrol_credit_plugin extends enrol_plugin {
             }
         }
 
-        if ($this->get_user_credits($USER->id) < $instance->customint7) {
+        if (self::get_user_credits($USER->id) < $instance->customint7) {
             return get_string('insufficient_credits', 'enrol_credit', [
                 'credit_cost' => $instance->customint7,
-                'user_credits' => $this->get_user_credits($USER->id)]);
+                'user_credits' => self::get_user_credits($USER->id)]);
         }
 
         return true;
@@ -1036,7 +1036,7 @@ class enrol_credit_plugin extends enrol_plugin {
      * @return int|mixed
      * @throws dml_exception
      */
-    public function get_user_credits($userid) {
+    public static function get_user_credits($userid) {
         global $DB;
 
         if (!$fieldid = get_config('enrol_credit', 'credit_field')) {
@@ -1057,13 +1057,13 @@ class enrol_credit_plugin extends enrol_plugin {
      * @param stdClass $instance
      * @throws dml_exception
      */
-    public function deduct_credits($userid, stdClass $instance) {
+    public static function deduct_credits($userid, int $amount) {
         global $DB;
 
         $data = $DB->get_record('user_info_data', [
             'userid' => $userid,
             'fieldid' => get_config('enrol_credit', 'credit_field')], '*', MUST_EXIST);
-        $data->data = intval($data->data) - $instance->customint7;
+        $data->data = intval($data->data) - $amount;
 
         $DB->update_record('user_info_data', $data);
     }
@@ -1073,7 +1073,7 @@ class enrol_credit_plugin extends enrol_plugin {
      * @param int $credits
      * @throws dml_exception
      */
-    public function add_credits($userid, $credits) {
+    public static function add_credits($userid, $credits) {
         global $DB;
 
         if (!$data = $DB->get_record('user_info_data', [

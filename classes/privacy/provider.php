@@ -18,7 +18,7 @@
  * Privacy Subsystem implementation for enrol_credit.
  *
  * @package    enrol_credit
- * @copyright  2018 bdecent gmbh <https://bdecent.de>
+ * @copyright  2021 bdecent gmbh <https://bdecent.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Privacy Subsystem for enrol_credit implementing null_provider.
  *
- * @copyright  2018 bdecent gmbh <https://bdecent.de>
+ * @copyright  2021 bdecent gmbh <https://bdecent.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements \core_privacy\local\metadata\null_provider {

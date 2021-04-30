@@ -16,7 +16,7 @@
 
 /**
  * @package    enrol_credit
- * @copyright  2018 bdecent gmbh <https://bdecent.de>
+ * @copyright  2021 bdecent gmbh <https://bdecent.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -30,7 +30,7 @@ require_once("$CFG->dirroot/enrol/bulkchange_forms.php");
  * The form to confirm the intention to bulk delete users enrolments.
  *
  * @package enrol_credit
- * @copyright 2018 bdecent gmbh <https://bdecent.de>
+ * @copyright 2021 bdecent gmbh <https://bdecent.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class deleteselectedusers_form extends \enrol_bulk_enrolment_confirm_form {

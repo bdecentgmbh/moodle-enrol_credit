@@ -18,14 +18,14 @@
  * Credit enrolment plugin version specification.
  *
  * @package    enrol_credit
- * @copyright  2018 bdecent gmbh <https://bdecent.de>
+ * @copyright  2021 bdecent gmbh <https://bdecent.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2019032500; // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version   = 2021043000; // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires  = 2016120509; // Requires this Moodle version.
 $plugin->component = 'enrol_credit'; // Full name of the plugin (used for diagnostics).
-$plugin->release   = '1.0';
+$plugin->release   = '1.1';
 $plugin->maturity = MATURITY_STABLE;

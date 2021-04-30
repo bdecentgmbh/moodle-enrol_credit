@@ -16,7 +16,7 @@
 
 /**
  * @package    enrol_credit
- * @copyright  2018 bdecent gmbh <https://bdecent.de>
+ * @copyright  2021 bdecent gmbh <https://bdecent.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
  * A bulk operation for the credit enrolment plugin to edit selected users.
  *
  * @package enrol_credit
- * @copyright 2018 bdecent gmbh <https://bdecent.de>
+ * @copyright 2021 bdecent gmbh <https://bdecent.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class editselectedusers_operation extends \enrol_bulk_enrolment_operation {
