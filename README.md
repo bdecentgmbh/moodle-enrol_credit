@@ -1,4 +1,3 @@
-
 Credit Enrolment for Moodle
 ==========
 
@@ -14,3 +13,5 @@ The key features are:
 - store credits in the user’s profile
 - assign a price (=number of credits required) for a course
 - enrol into the course by deducting the required credits from the user who enrols (only if enough credits are available)
+
+There's also a companion availability condition which allows teachers to restrict course contents (instead of the course itself). Students need to pay the configured amount of credits to access the activity or resource.
