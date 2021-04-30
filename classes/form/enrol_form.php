@@ -16,7 +16,7 @@
 
 /**
  * @package    enrol_credit
- * @copyright  2018 bdecent gmbh <https://bdecent.de>
+ * @copyright  2021 bdecent gmbh <https://bdecent.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -52,7 +52,7 @@ class enrol_form extends \moodleform
         $mform->addElement('header', 'creditheader', $heading);
 
         $mform->addElement('html', get_string('checkout', 'enrol_credit',
-            ['credit_cost' => $instance->customint7, 'user_credits' => $plugin->get_user_credits($USER->id)]));
+            ['credit_cost' => $instance->customint7, 'user_credits' => \enrol_credit_plugin::get_user_credits($USER->id)]));
 
         $this->add_action_buttons(false, get_string('purchase', 'enrol_credit'));
 
