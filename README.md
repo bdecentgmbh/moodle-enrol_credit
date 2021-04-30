@@ -1,5 +1,7 @@
 
-== Credit Enrolment for Moodle ==
+Credit Enrolment for Moodle
+==========
+
 by bdecent.de
 
 While there are existing solutions to sell courses in moodle, they only cover the requirements to a certain extent: Some of the solutions (e.g. the PayPal and Stripe extensions) work great when courses are sold to individuals. Other solutions (e.g. integrations with courseware, woocommerce etc.) are much more feature rich and provide the full e-commerce experience, including seo, many billing options, invoicing, discounts etc. However, the implementation, maintenance and running cost of such a solution is a lot higher.
