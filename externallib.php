@@ -204,7 +204,7 @@ class enrol_credit_external extends external_api {
                                 'item' => 'instance',
                                 'itemid' => $instance->id,
                                 'warningcode' => '3',
-                                'message' => s(get_string('passwordinvalidhint', 'enrol_credit', $hint)) // message is PARAM_TEXT.
+                                'message' => s(get_string('passwordinvalidhint', 'enrol_credit', $hint)) // Message is PARAM_TEXT.
                             );
                             continue;
                         } else {
@@ -263,17 +263,17 @@ class enrol_credit_external extends external_api {
      */
     public static function credit_users_parameters() {
         return new external_function_parameters(
-                array(
-                    'credits' => new external_multiple_structure(
-                            new external_single_structure(
-                                    array(
-                                        'userid' => new external_value(PARAM_INT, 'The user that is going to be given new course credits'),
-                                        'credit' => new external_value(PARAM_INT, 'The amount of credit to be added'),
-                                        'quantity' => new external_value(PARAM_INT, 'The quantity of credits to be added'),
-                                    )
-                            )
+            array(
+                'credits' => new external_multiple_structure(
+                    new external_single_structure(
+                        array(
+                            'userid' => new external_value(PARAM_INT, 'The user that is going to be given new course credits'),
+                            'credit' => new external_value(PARAM_INT, 'The amount of credit to be added'),
+                            'quantity' => new external_value(PARAM_INT, 'The quantity of credits to be added'),
+                        )
                     )
                 )
+            )
         );
     }
 
@@ -281,19 +281,19 @@ class enrol_credit_external extends external_api {
      * Enrolment of users.
      *
      * Function throw an exception at the first error encountered.
-     * @param array $enrolments  An array of user enrolment
+     * @param array $coursecredits Credits for the course to enrol.
      * @since Moodle 2.2
      */
-    public static function credit_users($course_credits) {
+    public static function credit_users($coursecredits) {
         global $DB, $CFG;
 
         require_once($CFG->dirroot . '/enrol/credit/lib.php');
 
         $params = self::validate_parameters(self::credit_users_parameters(),
-                array('credits' => $course_credits));
+                array('credits' => $coursecredits));
 
-        foreach ($course_credits as $course_credit) {
-            enrol_credit_plugin::add_credits($course_credit['userid'], $course_credit['credit'] * $course_credit['quantity']);
+        foreach ($coursecredits as $coursecredit) {
+            enrol_credit_plugin::add_credits($coursecredit['userid'], $coursecredit['credit'] * $coursecredit['quantity']);
         }
         $result = array();
         $result['status'] = true;

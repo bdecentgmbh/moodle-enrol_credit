@@ -23,6 +23,8 @@
  * @since     Moodle 3.6
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 $functions = array(
     'enrol_credit_get_instance_info' => array(
         'classname'   => 'enrol_credit_external',

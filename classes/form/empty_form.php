@@ -30,6 +30,9 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * Display the warning message to the user about their credits.
+ */
 class empty_form extends \moodleform {
     /**
      * Form definition.

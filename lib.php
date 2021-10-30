@@ -34,7 +34,18 @@ defined('MOODLE_INTERNAL') || die();
  */
 class enrol_credit_plugin extends enrol_plugin {
 
+    /**
+     * Enroller instance data.
+     *
+     * @var stdclass
+     */
     protected $lasternoller = null;
+
+    /**
+     * Enroller user instance id.
+     *
+     * @var int
+     */
     protected $lasternollerinstanceid = 0;
 
     /**
@@ -580,8 +591,8 @@ class enrol_credit_plugin extends enrol_plugin {
      * @param restore_enrolments_structure_step $step
      * @param stdClass $data
      * @param stdClass $instance
-     * @param int $oldinstancestatus
      * @param int $userid
+     * @param int $oldinstancestatus
      * @throws \coding_exception
      * @since 1.0
      */
@@ -689,7 +700,7 @@ class enrol_credit_plugin extends enrol_plugin {
      * @throws \coding_exception
      * @since 1.0
      */
-    protected function get_longtimenosee_options() {
+    public function get_longtimenosee_options() {
         $options = [0 => get_string('never'),
                     1800 * 3600 * 24 => get_string('numdays', '', 1800),
                     1000 * 3600 * 24 => get_string('numdays', '', 1000),
@@ -986,7 +997,7 @@ class enrol_credit_plugin extends enrol_plugin {
      * Get the "from" contact which the email will be sent from.
      *
      * @param int $sendoption send email from constant ENROL_SEND_EMAIL_FROM_*
-     * @param $context context where the user will be fetched
+     * @param stdclass $context  where the user will be fetched
      * @return mixed|stdClass the contact user object.
      */
     public function get_welcome_email_contact($sendoption, $context) {
@@ -1032,7 +1043,7 @@ class enrol_credit_plugin extends enrol_plugin {
     /**
      * Get number of credits available to user.
      *
-     * @param $userid
+     * @param int $userid
      * @return int|mixed
      * @throws dml_exception
      */
@@ -1053,8 +1064,10 @@ class enrol_credit_plugin extends enrol_plugin {
     }
 
     /**
+     * Reduce the amount of credits used to enrol into course from user record.
+     *
      * @param int $userid
-     * @param stdClass $instance
+     * @param int $amount
      * @throws dml_exception
      */
     public static function deduct_credits($userid, int $amount) {
@@ -1069,6 +1082,8 @@ class enrol_credit_plugin extends enrol_plugin {
     }
 
     /**
+     * Add the given credits to user accounts.
+     *
      * @param int $userid
      * @param int $credits
      * @throws dml_exception
