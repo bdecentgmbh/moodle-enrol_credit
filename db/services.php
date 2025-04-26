@@ -25,31 +25,31 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$functions = array(
-    'enrol_credit_get_instance_info' => array(
+$functions = [
+    'enrol_credit_get_instance_info' => [
         'classname'   => 'enrol_credit_external',
         'methodname'  => 'get_instance_info',
         'classpath'   => 'enrol/credit/externallib.php',
         'description' => 'credit enrolment instance information.',
         'type'        => 'read',
-        'services'    => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
-    ),
+        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE],
+    ],
 
-    'enrol_credit_enrol_user' => array(
+    'enrol_credit_enrol_user' => [
         'classname'   => 'enrol_credit_external',
         'methodname'  => 'enrol_user',
         'classpath'   => 'enrol/credit/externallib.php',
         'description' => 'credit enrol the current user in the given course.',
         'type'        => 'write',
-        'services'    => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
-    ),
+        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE],
+    ],
 
-    'enrol_credit_credit_users' => array(
+    'enrol_credit_credit_users' => [
         'classname'   => 'enrol_credit_external',
         'methodname'  => 'credit_users',
         'classpath'   => 'enrol/credit/externallib.php',
         'description' => 'credit the provided users with course credits.',
         'type'        => 'write',
-        'services'    => array(),
-    )
-);
+        'services'    => [],
+    ],
+];

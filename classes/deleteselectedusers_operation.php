@@ -24,8 +24,6 @@
 
 namespace enrol_credit;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * A bulk operation for the credit enrolment plugin to delete selected users enrolments.
  *
@@ -63,8 +61,8 @@ class deleteselectedusers_operation extends \enrol_bulk_enrolment_operation {
      * @return \enrol_manual_editselectedusers_form
      */
     public function get_form($defaultaction = null, $defaultcustomdata = null) {
-        if (!array($defaultcustomdata)) {
-            $defaultcustomdata = array();
+        if (![$defaultcustomdata]) {
+            $defaultcustomdata = [];
         }
         $defaultcustomdata['title'] = $this->get_title();
         $defaultcustomdata['message'] = get_string('confirmbulkdeleteenrolment', 'enrol_credit');

@@ -43,7 +43,7 @@ class enrol_credit_external extends external_api {
      */
     public static function get_instance_info_parameters() {
         return new external_function_parameters(
-                array('instanceid' => new external_value(PARAM_INT, 'instance id of credit enrolment plugin.'))
+                ['instanceid' => new external_value(PARAM_INT, 'instance id of credit enrolment plugin.')]
             );
     }
 
@@ -59,7 +59,7 @@ class enrol_credit_external extends external_api {
 
         require_once($CFG->libdir . '/enrollib.php');
 
-        $params = self::validate_parameters(self::get_instance_info_parameters(), array('instanceid' => $instanceid));
+        $params = self::validate_parameters(self::get_instance_info_parameters(), ['instanceid' => $instanceid]);
 
         // Retrieve credit enrolment plugin.
         $enrolplugin = enrol_get_plugin('credit');
@@ -69,8 +69,8 @@ class enrol_credit_external extends external_api {
 
         self::validate_context(context_system::instance());
 
-        $enrolinstance = $DB->get_record('enrol', array('id' => $params['instanceid']), '*', MUST_EXIST);
-        $course = $DB->get_record('course', array('id' => $enrolinstance->courseid), '*', MUST_EXIST);
+        $enrolinstance = $DB->get_record('enrol', ['id' => $params['instanceid']], '*', MUST_EXIST);
+        $course = $DB->get_record('course', ['id' => $enrolinstance->courseid], '*', MUST_EXIST);
         if (!core_course_category::can_view_course_info($course) && !can_access_course($course)) {
             throw new moodle_exception('coursehidden');
         }
@@ -91,14 +91,14 @@ class enrol_credit_external extends external_api {
      */
     public static function get_instance_info_returns() {
         return new external_single_structure(
-            array(
+            [
                 'id' => new external_value(PARAM_INT, 'id of course enrolment instance'),
                 'courseid' => new external_value(PARAM_INT, 'id of course'),
                 'type' => new external_value(PARAM_PLUGIN, 'type of enrolment plugin'),
                 'name' => new external_value(PARAM_RAW, 'name of enrolment plugin'),
                 'status' => new external_value(PARAM_RAW, 'status of enrolment plugin'),
                 'enrolpassword' => new external_value(PARAM_RAW, 'password required for enrolment', VALUE_OPTIONAL),
-            )
+            ]
         );
     }
 
@@ -110,11 +110,11 @@ class enrol_credit_external extends external_api {
      */
     public static function enrol_user_parameters() {
         return new external_function_parameters(
-            array(
+            [
                 'courseid' => new external_value(PARAM_INT, 'Id of the course'),
                 'password' => new external_value(PARAM_RAW, 'Enrolment key', VALUE_DEFAULT, ''),
-                'instanceid' => new external_value(PARAM_INT, 'Instance id of credit enrolment plugin.', VALUE_DEFAULT, 0)
-            )
+                'instanceid' => new external_value(PARAM_INT, 'Instance id of credit enrolment plugin.', VALUE_DEFAULT, 0),
+            ]
         );
     }
 
@@ -134,16 +134,16 @@ class enrol_credit_external extends external_api {
         require_once($CFG->libdir . '/enrollib.php');
 
         $params = self::validate_parameters(self::enrol_user_parameters(),
-                                            array(
+                                            [
                                                 'courseid' => $courseid,
                                                 'password' => $password,
-                                                'instanceid' => $instanceid
-                                            ));
+                                                'instanceid' => $instanceid,
+                                            ]);
 
-        $warnings = array();
+        $warnings = [];
 
         $course = get_course($params['courseid']);
-        $context = context_course::instance($course->id);
+        $context = \context_course::instance($course->id);
         self::validate_context(context_system::instance());
 
         if (!core_course_category::can_view_course_info($course)) {
@@ -157,7 +157,7 @@ class enrol_credit_external extends external_api {
         }
 
         // We can expect multiple credit-enrolment instances.
-        $instances = array();
+        $instances = [];
         $enrolinstances = enrol_get_instances($course->id, true);
         foreach ($enrolinstances as $courseenrolinstance) {
             if ($courseenrolinstance->enrol == "credit") {
@@ -182,59 +182,59 @@ class enrol_credit_external extends external_api {
         foreach ($instances as $instance) {
             $enrolstatus = $enrol->can_credit_enrol($instance);
             if ($enrolstatus === true) {
-                if ($instance->password and $params['password'] !== $instance->password) {
+                if ($instance->password && $params['password'] !== $instance->password) {
 
                     // Check if we are using group enrolment keys.
                     if ($instance->customint1) {
                         require_once($CFG->dirroot . "/enrol/credit/locallib.php");
 
                         if (!enrol_credit_check_group_enrolment_key($course->id, $params['password'])) {
-                            $warnings[] = array(
+                            $warnings[] = [
                                 'item' => 'instance',
                                 'itemid' => $instance->id,
                                 'warningcode' => '2',
-                                'message' => get_string('passwordinvalid', 'enrol_credit')
-                            );
+                                'message' => get_string('passwordinvalid', 'enrol_credit'),
+                            ];
                             continue;
                         }
                     } else {
                         if ($enrol->get_config('showhint')) {
                             $hint = core_text::substr($instance->password, 0, 1);
-                            $warnings[] = array(
+                            $warnings[] = [
                                 'item' => 'instance',
                                 'itemid' => $instance->id,
                                 'warningcode' => '3',
-                                'message' => s(get_string('passwordinvalidhint', 'enrol_credit', $hint)) // Message is PARAM_TEXT.
-                            );
+                                'message' => s(get_string('passwordinvalidhint', 'enrol_credit', $hint)), // Message is PARAM_TEXT.
+                            ];
                             continue;
                         } else {
-                            $warnings[] = array(
+                            $warnings[] = [
                                 'item' => 'instance',
                                 'itemid' => $instance->id,
                                 'warningcode' => '4',
-                                'message' => get_string('passwordinvalid', 'enrol_credit')
-                            );
+                                'message' => get_string('passwordinvalid', 'enrol_credit'),
+                            ];
                             continue;
                         }
                     }
                 }
 
                 // Do the enrolment.
-                $data = array('enrolpassword' => $params['password']);
+                $data = ['enrolpassword' => $params['password']];
                 $enrol->enrol_credit($instance, (object) $data);
                 $enrolled = true;
                 break;
             } else {
-                $warnings[] = array(
+                $warnings[] = [
                     'item' => 'instance',
                     'itemid' => $instance->id,
                     'warningcode' => '1',
-                    'message' => $enrolstatus
-                );
+                    'message' => $enrolstatus,
+                ];
             }
         }
 
-        $result = array();
+        $result = [];
         $result['status'] = $enrolled;
         $result['warnings'] = $warnings;
         return $result;
@@ -248,10 +248,10 @@ class enrol_credit_external extends external_api {
      */
     public static function enrol_user_returns() {
         return new external_single_structure(
-            array(
+            [
                 'status' => new external_value(PARAM_BOOL, 'status: true if the user is enrolled, false otherwise'),
-                'warnings' => new external_warnings()
-            )
+                'warnings' => new external_warnings(),
+            ]
         );
     }
 
@@ -263,17 +263,17 @@ class enrol_credit_external extends external_api {
      */
     public static function credit_users_parameters() {
         return new external_function_parameters(
-            array(
+            [
                 'credits' => new external_multiple_structure(
                     new external_single_structure(
-                        array(
+                        [
                             'userid' => new external_value(PARAM_INT, 'The user that is going to be given new course credits'),
                             'credit' => new external_value(PARAM_INT, 'The amount of credit to be added'),
                             'quantity' => new external_value(PARAM_INT, 'The quantity of credits to be added'),
-                        )
+                        ]
                     )
-                )
-            )
+                ),
+            ]
         );
     }
 
@@ -290,14 +290,14 @@ class enrol_credit_external extends external_api {
         require_once($CFG->dirroot . '/enrol/credit/lib.php');
 
         $params = self::validate_parameters(self::credit_users_parameters(),
-                array('credits' => $coursecredits));
+                ['credits' => $coursecredits]);
 
         foreach ($coursecredits as $coursecredit) {
             enrol_credit_plugin::add_credits($coursecredit['userid'], $coursecredit['credit'] * $coursecredit['quantity']);
         }
-        $result = array();
+        $result = [];
         $result['status'] = true;
-        $result['warnings'] = array();
+        $result['warnings'] = [];
         return $result;
     }
 
@@ -309,10 +309,10 @@ class enrol_credit_external extends external_api {
      */
     public static function credit_users_returns() {
         return  new external_single_structure(
-            array(
+            [
                 'status' => new external_value(PARAM_BOOL, 'Status: true only if token is valid'),
-                'warnings' => new external_warnings()
-            )
+                'warnings' => new external_warnings(),
+            ]
         );
     }
 }

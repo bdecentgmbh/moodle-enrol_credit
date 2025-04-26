@@ -4,11 +4,11 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     services:
       postgres:
-        image: postgres:12.7
+        image: postgres:13
         env:
           POSTGRES_USER: 'postgres'
           POSTGRES_HOST_AUTH_METHOD: 'trust'
@@ -16,7 +16,7 @@ jobs:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 3
       mariadb:
-        image: mariadb:10.5
+        image: mariadb:10.6.7
         env:
           MYSQL_USER: 'root'
           MYSQL_ALLOW_EMPTY_PASSWORD: "true"
@@ -28,20 +28,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - php: '8.0'
-            moodle-branch: 'master'
+          - php: '8.3'
+            moodle-branch: 'MOODLE_405_STABLE'
             database: 'pgsql'
-          - php: '7.4'
-            moodle-branch: 'master'
-            database: 'mariadb'
-          - php: '7.4'
-            moodle-branch: 'MOODLE_311_STABLE'
-            database: 'pgsql'
-          - php: '7.4'
-            moodle-branch: 'MOODLE_310_STABLE'
-            database: 'pgsql'
-          - php: '7.3'
-            moodle-branch: 'MOODLE_39_STABLE'
+          - php: '8.3'
+            moodle-branch: 'MOODLE_405_STABLE'
             database: 'mariadb'
 
     steps:
@@ -85,7 +76,7 @@ jobs:
 
       - name: Moodle Code Checker
         if: ${{ always() }}
-        run: moodle-plugin-ci codechecker --max-warnings 0 
+        run: moodle-plugin-ci codechecker --max-warnings 0
 
       - name: Moodle PHPDoc Checker
         if: ${{ always() }}

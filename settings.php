@@ -46,16 +46,16 @@ if ($ADMIN->fulltree) {
 
     // Note: let's reuse the ext sync constants and strings here, internally it is very similar,
     // it describes what should happend when users are not supposed to be enerolled any more.
-    $options = array(
+    $options = [
         ENROL_EXT_REMOVED_KEEP           => get_string('extremovedkeep', 'enrol'),
         ENROL_EXT_REMOVED_SUSPENDNOROLES => get_string('extremovedsuspendnoroles', 'enrol'),
         ENROL_EXT_REMOVED_UNENROL        => get_string('extremovedunenrol', 'enrol'),
-    );
+    ];
     $settings->add(new admin_setting_configselect('enrol_credit/expiredaction',
         get_string('expiredaction', 'enrol_credit'), get_string('expiredaction_help', 'enrol_credit'),
         ENROL_EXT_REMOVED_KEEP, $options));
 
-    $options = array();
+    $options = [];
     for ($i = 0; $i < 24; $i++) {
         $options[$i] = $i;
     }
@@ -69,18 +69,18 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('enrol_credit/defaultenrol',
         get_string('defaultenrol', 'enrol'), get_string('defaultenrol_desc', 'enrol'), 1));
 
-    $options = array(ENROL_INSTANCE_ENABLED  => get_string('yes'),
-                     ENROL_INSTANCE_DISABLED => get_string('no'));
+    $options = [ENROL_INSTANCE_ENABLED  => get_string('yes'),
+                     ENROL_INSTANCE_DISABLED => get_string('no')];
     $settings->add(new admin_setting_configselect('enrol_credit/status',
         get_string('status', 'enrol_credit'), get_string('status_desc', 'enrol_credit'), ENROL_INSTANCE_DISABLED,
         $options));
 
-    $options = array(1  => get_string('yes'), 0 => get_string('no'));
+    $options = [1  => get_string('yes'), 0 => get_string('no')];
     $settings->add(new admin_setting_configselect('enrol_credit/newenrols',
         get_string('newenrols', 'enrol_credit'), get_string('newenrols_desc', 'enrol_credit'), 1, $options));
 
-    $options = array(1  => get_string('yes'),
-                     0 => get_string('no'));
+    $options = [1  => get_string('yes'),
+                     0 => get_string('no')];
     $settings->add(new admin_setting_configselect('enrol_credit/groupkey',
         get_string('groupkey', 'enrol_credit'), get_string('groupkey_desc', 'enrol_credit'), 0, $options));
 
@@ -96,8 +96,8 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configduration('enrol_credit/enrolperiod',
         get_string('enrolperiod', 'enrol_credit'), get_string('enrolperiod_desc', 'enrol_credit'), 0));
 
-    $options = array(0 => get_string('no'), 1 => get_string('expirynotifyenroller', 'core_enrol'), 2 =>
-        get_string('expirynotifyall', 'core_enrol'));
+    $options = [0 => get_string('no'), 1 => get_string('expirynotifyenroller', 'core_enrol'), 2 =>
+        get_string('expirynotifyall', 'core_enrol')];
     $settings->add(new admin_setting_configselect('enrol_credit/expirynotify',
         get_string('expirynotify', 'core_enrol'), get_string('expirynotify_help', 'core_enrol'), 0, $options));
 
