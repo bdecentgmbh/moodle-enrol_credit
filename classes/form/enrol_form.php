@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Enrolment form displayed on the course enrol page.
+ *
  * @package    enrol_credit
  * @copyright  2021 bdecent gmbh <https://bdecent.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,9 +28,23 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/formslib.php');
 
-class enrol_form extends \moodleform
-{
+/**
+ * Enrol form called from course enrolment hook, Using this form user will enrol into course from course enrol page.
+ */
+class enrol_form extends \moodleform {
+
+    /**
+     * Custom data related to the enrol plugin instance.
+     *
+     * @var stdclass
+     */
     protected $instance;
+
+    /**
+     * Status of max enroled users are reached.
+     *
+     * @var bool
+     */
     protected $toomany = false;
 
     /**
@@ -41,8 +57,14 @@ class enrol_form extends \moodleform
         return $formid;
     }
 
-    public function definition() {
+    /**
+     * Credits enrol form elements and notifications are defined.
+     *
+     * @return void
+     */
+    public function definition(): void {
         global $USER, $OUTPUT, $CFG;
+
         $mform = $this->_form;
         $instance = $this->_customdata;
         $this->instance = $instance;
@@ -65,6 +87,13 @@ class enrol_form extends \moodleform
         $mform->setDefault('instance', $instance->id);
     }
 
+    /**
+     * Validate the processed data is valid and user is qulified to enrol into course using there credits.
+     *
+     * @param array $data User data to enrol.
+     * @param array $files List of files data submitted from form.
+     * @return array $errors List of errors prevent the user enrollment.
+     */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
         $instance = $this->instance;

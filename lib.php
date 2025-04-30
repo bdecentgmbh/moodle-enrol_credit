@@ -25,8 +25,6 @@
 use enrol_credit\form\enrol_form;
 use enrol_credit\form\empty_form;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Credit enrolment plugin implementation.
  *
@@ -34,7 +32,18 @@ defined('MOODLE_INTERNAL') || die();
  */
 class enrol_credit_plugin extends enrol_plugin {
 
+    /**
+     * Enroller instance data.
+     *
+     * @var stdclass
+     */
     protected $lasternoller = null;
+
+    /**
+     * Enroller user instance id.
+     *
+     * @var int
+     */
     protected $lasternollerinstanceid = 0;
 
     /**
@@ -80,7 +89,7 @@ class enrol_credit_plugin extends enrol_plugin {
 
         if (empty($instance->name)) {
             if (!empty($instance->roleid) && $role = $DB->get_record('role', ['id' => $instance->roleid])) {
-                $role = ' (' . role_get_name($role, context_course::instance($instance->courseid, IGNORE_MISSING)) . ')';
+                $role = ' (' . role_get_name($role, \context_course::instance($instance->courseid, IGNORE_MISSING)) . ')';
             } else {
                 $role = '';
             }
@@ -151,9 +160,9 @@ class enrol_credit_plugin extends enrol_plugin {
      * @since 1.0
      */
     public function can_add_instance($courseid) {
-        $context = context_course::instance($courseid, MUST_EXIST);
+        $context = \context_course::instance($courseid, MUST_EXIST);
 
-        if (!has_capability('moodle/course:enrolconfig', $context) or !has_capability('enrol/credit:config', $context)) {
+        if (!has_capability('moodle/course:enrolconfig', $context) || !has_capability('enrol/credit:config', $context)) {
             return false;
         }
 
@@ -172,7 +181,8 @@ class enrol_credit_plugin extends enrol_plugin {
      */
     public function enrol_self(stdClass $instance, \stdClass $user, $data = null) {
 
-        self::deduct_credits($user->id, $instance->customint7);
+        $amount = $instance->customint7 != null ? $instance->customint7 : 0;
+        self::deduct_credits($user->id, $amount);
 
         $timestart = time();
         if ($instance->enrolperiod) {
@@ -264,11 +274,11 @@ class enrol_credit_plugin extends enrol_plugin {
             return get_string('canntenrol', 'enrol_credit');
         }
 
-        if ($instance->enrolstartdate != 0 and $instance->enrolstartdate > time()) {
+        if ($instance->enrolstartdate != 0 && $instance->enrolstartdate > time()) {
             return get_string('canntenrolearly', 'enrol_credit', userdate($instance->enrolstartdate));
         }
 
-        if ($instance->enrolenddate != 0 and $instance->enrolenddate < time()) {
+        if ($instance->enrolenddate != 0 && $instance->enrolenddate < time()) {
             return get_string('canntenrollate', 'enrol_credit', userdate($instance->enrolenddate));
         }
 
@@ -385,14 +395,15 @@ class enrol_credit_plugin extends enrol_plugin {
         global $CFG, $DB;
 
         $course = $DB->get_record('course', ['id' => $instance->courseid], '*', MUST_EXIST);
-        $context = context_course::instance($course->id);
+        $context = \context_course::instance($course->id);
 
         $a = new stdClass();
         $a->coursename = format_string($course->fullname, true, ['context' => $context]);
         $a->profileurl = "$CFG->wwwroot/user/view.php?id=$user->id&course=$course->id";
 
-        if (trim($instance->customtext1) !== '') {
-            $message = $instance->customtext1;
+        $customtext1 = $instance->customtext1 != null ? $instance->customtext1 : '';
+        if (trim($customtext1) !== '') {
+            $message = $customtext1;
             $key = ['{$a->coursename}', '{$a->profileurl}', '{$a->fullname}', '{$a->email}'];
             $value = [$a->coursename, $a->profileurl, fullname($user), $user->email];
             $message = str_replace($key, $value, $message);
@@ -515,12 +526,12 @@ class enrol_credit_plugin extends enrol_plugin {
     protected function get_enroller($instanceid) {
         global $DB;
 
-        if ($this->lasternollerinstanceid == $instanceid and $this->lasternoller) {
+        if ($this->lasternollerinstanceid == $instanceid && $this->lasternoller) {
             return $this->lasternoller;
         }
 
         $instance = $DB->get_record('enrol', ['id' => $instanceid, 'enrol' => $this->get_name()], '*', MUST_EXIST);
-        $context = context_course::instance($instance->courseid);
+        $context = \context_course::instance($instance->courseid);
 
         if ($users = get_enrolled_users($context, 'enrol/credit:manage')) {
             $users = sort_by_roleassignment_authority($users, $context);
@@ -558,7 +569,7 @@ class enrol_credit_plugin extends enrol_plugin {
                 'roleid'     => $data->roleid,
             ];
         }
-        if ($merge and $instances = $DB->get_records('enrol', $merge, 'id')) {
+        if ($merge && $instances = $DB->get_records('enrol', $merge, 'id')) {
             $instance = reset($instances);
             $instanceid = $instance->id;
         } else {
@@ -580,8 +591,8 @@ class enrol_credit_plugin extends enrol_plugin {
      * @param restore_enrolments_structure_step $step
      * @param stdClass $data
      * @param stdClass $instance
-     * @param int $oldinstancestatus
      * @param int $userid
+     * @param int $oldinstancestatus
      * @throws \coding_exception
      * @since 1.0
      */
@@ -614,7 +625,7 @@ class enrol_credit_plugin extends enrol_plugin {
      * @since 1.0
      */
     public function can_delete_instance($instance) {
-        $context = context_course::instance($instance->courseid);
+        $context = \context_course::instance($instance->courseid);
         return has_capability('enrol/credit:config', $context);
     }
 
@@ -627,7 +638,7 @@ class enrol_credit_plugin extends enrol_plugin {
      * @since 1.0
      */
     public function can_hide_show_instance($instance) {
-        $context = context_course::instance($instance->courseid);
+        $context = \context_course::instance($instance->courseid);
         return has_capability('enrol/credit:config', $context);
     }
 
@@ -689,7 +700,7 @@ class enrol_credit_plugin extends enrol_plugin {
      * @throws \coding_exception
      * @since 1.0
      */
-    protected function get_longtimenosee_options() {
+    public function get_longtimenosee_options() {
         $options = [0 => get_string('never'),
                     1800 * 3600 * 24 => get_string('numdays', '', 1800),
                     1000 * 3600 * 24 => get_string('numdays', '', 1000),
@@ -715,7 +726,7 @@ class enrol_credit_plugin extends enrol_plugin {
      */
     public function get_bulk_operations(course_enrolment_manager $manager) {
         $context = $manager->get_context();
-        $bulkoperations = array();
+        $bulkoperations = [];
         if (has_capability("enrol/credit:manage", $context)) {
             $bulkoperations['editselectedusers'] = new \enrol_credit\editselectedusers_operation($manager, $this);
         }
@@ -738,7 +749,7 @@ class enrol_credit_plugin extends enrol_plugin {
         global $CFG, $DB;
 
         // Merge these two settings to one value for the single selection element.
-        if ($instance->notifyall and $instance->expirynotify) {
+        if ($instance->notifyall && $instance->expirynotify) {
             $instance->expirynotify = 2;
         }
         unset($instance->notifyall);
@@ -868,12 +879,12 @@ class enrol_credit_plugin extends enrol_plugin {
         $errors = [];
 
         if ($data['status'] == ENROL_INSTANCE_ENABLED) {
-            if (!empty($data['enrolenddate']) and $data['enrolenddate'] < $data['enrolstartdate']) {
+            if (!empty($data['enrolenddate']) && $data['enrolenddate'] < $data['enrolstartdate']) {
                 $errors['enrolenddate'] = get_string('enrolenddaterror', 'enrol_credit');
             }
         }
 
-        if ($data['expirynotify'] > 0 and $data['expirythreshold'] < 86400) {
+        if ($data['expirynotify'] > 0 && $data['expirythreshold'] < 86400) {
             $errors['expirythreshold'] = get_string('errorthresholdlow', 'core_enrol');
         }
 
@@ -884,11 +895,11 @@ class enrol_credit_plugin extends enrol_plugin {
         $validstatus = array_keys($this->get_status_options());
         $validnewenrols = array_keys($this->get_newenrols_options());
 
-        $context = context_course::instance($instance->courseid);
+        $context = \context_course::instance($instance->courseid);
         $validroles = array_keys($this->extend_assignable_roles($context, $instance->roleid));
         $validexpirynotify = array_keys($this->get_expirynotify_options());
         $validlongtimenosee = array_keys($this->get_longtimenosee_options());
-        $tovalidate = array(
+        $tovalidate = [
             'enrolstartdate' => PARAM_INT,
             'enrolenddate' => PARAM_INT,
             'name' => PARAM_TEXT,
@@ -900,8 +911,8 @@ class enrol_credit_plugin extends enrol_plugin {
             'status' => $validstatus,
             'enrolperiod' => PARAM_INT,
             'expirynotify' => $validexpirynotify,
-            'roleid' => $validroles
-        );
+            'roleid' => $validroles,
+        ];
         if ($data['expirynotify'] != 0) {
             $tovalidate['expirythreshold'] = PARAM_INT;
         }
@@ -975,7 +986,7 @@ class enrol_credit_plugin extends enrol_plugin {
 
         $roles = get_assignable_roles($context, ROLENAME_BOTH);
         if (!isset($roles[$defaultrole])) {
-            if ($role = $DB->get_record('role', array('id' => $defaultrole))) {
+            if ($role = $DB->get_record('role', ['id' => $defaultrole])) {
                 $roles[$defaultrole] = role_get_name($role, $context, ROLENAME_BOTH);
             }
         }
@@ -986,7 +997,7 @@ class enrol_credit_plugin extends enrol_plugin {
      * Get the "from" contact which the email will be sent from.
      *
      * @param int $sendoption send email from constant ENROL_SEND_EMAIL_FROM_*
-     * @param $context context where the user will be fetched
+     * @param stdclass $context  where the user will be fetched
      * @return mixed|stdClass the contact user object.
      */
     public function get_welcome_email_contact($sendoption, $context) {
@@ -995,16 +1006,18 @@ class enrol_credit_plugin extends enrol_plugin {
         $contact = null;
         // Send as the first user assigned as the course contact.
         if ($sendoption == ENROL_SEND_EMAIL_FROM_COURSE_CONTACT) {
-            $rusers = array();
+            $rusers = [];
             if (!empty($CFG->coursecontact)) {
                 $croles = explode(',', $CFG->coursecontact);
                 list($sort, $sortparams) = users_order_by_sql('u');
                 // We only use the first user.
                 $i = 0;
                 do {
-                    $allnames = get_all_user_name_fields(true, 'u');
-                    $rusers = get_role_users($croles[$i], $context, true, 'u.id,  u.confirmed, u.username, '. $allnames . ',
-                    u.email, r.sortorder, ra.id', 'r.sortorder, ra.id ASC, ' . $sort, null, '', '', '', '', $sortparams);
+                    $userfields = \core_user\fields::for_name()->with_identity($context);
+                    $userfieldssql = $userfields->get_sql('u');
+                    $rusers = get_role_users($croles[$i], $context, true,
+                        'u.id, u.confirmed, u.username' . $userfieldssql->selects . ', u.email, r.sortorder, ra.id',
+                        'r.sortorder, ra.id ASC, ' . $sort, null, '', '', '', '', $sortparams);
                     $i++;
                 } while (empty($rusers) && !empty($croles[$i]));
             }
@@ -1032,7 +1045,7 @@ class enrol_credit_plugin extends enrol_plugin {
     /**
      * Get number of credits available to user.
      *
-     * @param $userid
+     * @param int $userid
      * @return int|mixed
      * @throws dml_exception
      */
@@ -1053,22 +1066,28 @@ class enrol_credit_plugin extends enrol_plugin {
     }
 
     /**
+     * Reduce the amount of credits used to enrol into course from user record.
+     *
      * @param int $userid
-     * @param stdClass $instance
+     * @param int $amount
      * @throws dml_exception
      */
     public static function deduct_credits($userid, int $amount) {
         global $DB;
 
-        $data = $DB->get_record('user_info_data', [
-            'userid' => $userid,
-            'fieldid' => get_config('enrol_credit', 'credit_field')], '*', MUST_EXIST);
-        $data->data = intval($data->data) - $amount;
+        $field = get_config('enrol_credit', 'credit_field');
+        if ($DB->record_exists('user_info_data', ['userid' => $userid, 'fieldid' => $field])) {
 
-        $DB->update_record('user_info_data', $data);
+            $data = $DB->get_record('user_info_data', [ 'userid' => $userid, 'fieldid' => $field], '*', MUST_EXIST);
+            $data->data = intval($data->data) - $amount;
+
+            $DB->update_record('user_info_data', $data);
+        }
     }
 
     /**
+     * Add the given credits to user accounts.
+     *
      * @param int $userid
      * @param int $credits
      * @throws dml_exception

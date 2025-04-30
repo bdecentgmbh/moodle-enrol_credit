@@ -15,6 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * CLI script to update the user credit enrolments.
+ *
+ * @package    enrol_credit
+ * @copyright  2021 bdecent gmbh <https://bdecent.de>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+/**
  * CLI update for self enrolments, use for debugging or immediate update
  * of all courses.
  *
@@ -23,7 +31,7 @@
  *   - you need to change the "www-data" to match the apache user account
  *   - use "su" if "sudo" not available
  *
- * @package    enrol_self
+ * @package    enrol_credit
  * @copyright  2012 Petr Skoda {@link http://skodak.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -34,8 +42,8 @@ require(__DIR__.'/../../../config.php');
 require_once("$CFG->libdir/clilib.php");
 
 // Now get cli options.
-list($options, $unrecognized) = cli_get_params(array('verbose' => false, 'help' => false),
-    array('v' => 'verbose', 'h' => 'help'));
+list($options, $unrecognized) = cli_get_params(['verbose' => false, 'help' => false],
+    ['v' => 'verbose', 'h' => 'help']);
 
 if ($unrecognized) {
     $unrecognized = implode("\n  ", $unrecognized);

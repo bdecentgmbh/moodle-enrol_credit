@@ -15,14 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * A bulk operation for the credit enrolment plugin to edit selected users.
+ *
  * @package    enrol_credit
  * @copyright  2021 bdecent gmbh <https://bdecent.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace enrol_credit;
-
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * A bulk operation for the credit enrolment plugin to edit selected users.
@@ -65,8 +65,8 @@ class editselectedusers_operation extends \enrol_bulk_enrolment_operation {
         }
 
         // Get all of the user enrolment id's.
-        $ueids = array();
-        $instances = array();
+        $ueids = [];
+        $instances = [];
         foreach ($users as $user) {
             foreach ($user->enrolments as $enrolment) {
                 $ueids[] = $enrolment->id;
@@ -90,7 +90,7 @@ class editselectedusers_operation extends \enrol_bulk_enrolment_operation {
 
         list($ueidsql, $params) = $DB->get_in_or_equal($ueids, SQL_PARAMS_NAMED);
 
-        $updatesql = array();
+        $updatesql = [];
         if ($status == ENROL_USER_ACTIVE || $status == ENROL_USER_SUSPENDED) {
             $updatesql[] = 'status = :status';
             $params['status'] = (int)$status;
@@ -128,19 +128,19 @@ class editselectedusers_operation extends \enrol_bulk_enrolment_operation {
                     $enrolment->enrol     = 'credit';
                     // Trigger event.
                     $event = \core\event\user_enrolment_updated::create(
-                        array(
+                        [
                             'objectid' => $enrolment->id,
                             'courseid' => $enrolment->courseid,
-                            'context' => context_course::instance($enrolment->courseid),
+                            'context' => \context_course::instance($enrolment->courseid),
                             'relateduserid' => $user->id,
-                            'other' => array('enrol' => 'credit')
-                        )
+                            'other' => ['enrol' => 'credit'],
+                        ]
                     );
                     $event->trigger();
                 }
             }
             // Delete cached course contacts for this course because they may be affected.
-            cache::make('core', 'coursecontacts')->delete($manager->get_context()->instanceid);
+            \cache::make('core', 'coursecontacts')->delete($manager->get_context()->instanceid);
             return true;
         }
 

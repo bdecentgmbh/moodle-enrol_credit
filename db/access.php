@@ -24,53 +24,52 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = array(
-
+$capabilities = [
     /* Add or edit enrol-credit instance in course. */
-    'enrol/credit:config' => array(
+    'enrol/credit:config' => [
 
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
+        'archetypes' => [
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
-        )
-    ),
+        ],
+    ],
 
     /* Manage user credit-enrolments. */
-    'enrol/credit:manage' => array(
+    'enrol/credit:manage' => [
 
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
+        'archetypes' => [
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
-        )
-    ),
+        ],
+    ],
 
-    'enrol/credit:holdkey' => array(
+    'enrol/credit:holdkey' => [
 
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
-    ),
+    ],
 
     /* Voluntarily unenrol self from course - watch out for data loss. */
-    'enrol/credit:unenrolself' => array(
+    'enrol/credit:unenrolself' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
+        'archetypes' => [
             'student' => CAP_ALLOW,
-        )
-    ),
+        ],
+    ],
 
     /* Unenrol anybody from course (including self) -  watch out for data loss. */
-    'enrol/credit:unenrol' => array(
+    'enrol/credit:unenrol' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
+        'archetypes' => [
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
-        )
-    ),
+        ],
+    ],
 
-);
+];

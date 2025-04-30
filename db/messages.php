@@ -24,6 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$messageproviders = array(
-    'expiry_notification' => array(),
-);
+$messageproviders = [
+    'expiry_notification' => [],
+];

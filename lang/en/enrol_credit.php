@@ -30,13 +30,13 @@ $string['cohortnonmemberinfo'] = 'Only members of cohort \'{$a}\' can enrol.';
 $string['cohortonly'] = 'Only cohort members';
 $string['cohortonly_help'] = 'Enrolment may be restricted to members of a specified cohort only. Note that changing this setting has no effect on existing enrolments.';
 $string['confirmbulkdeleteenrolment'] = 'Are you sure you want to delete these user enrolments?';
-$string['credit_cost'] = 'Credit cost';
-$string['credit_cost_help'] = 'The number of credits users will be deducted when enrolling.';
 $string['credit:config'] = 'Configure course credit enrol instances';
 $string['credit:holdkey'] = 'Appear as the course credit enrolment key holder';
 $string['credit:manage'] = 'Manage enrolled users';
 $string['credit:unenrol'] = 'Unenrol users from course';
 $string['credit:unenrolself'] = 'Unenrol self from the course';
+$string['credit_cost'] = 'Credit cost';
+$string['credit_cost_help'] = 'The number of credits users will be deducted when enrolling.';
 $string['customwelcomemessage'] = 'Custom welcome message';
 $string['customwelcomemessage_help'] = 'A custom welcome message may be added as plain text or Moodle-auto format, including HTML tags and multi-lang tags.
 
@@ -62,18 +62,18 @@ $string['enrolstartdate'] = 'Start date';
 $string['enrolstartdate_help'] = 'If enabled, users can enrol themselves from this date onward only.';
 $string['expiredaction'] = 'Enrolment expiry action';
 $string['expiredaction_help'] = 'Select action to carry out when user enrolment expires. Please note that some user data and settings are purged from course during course unenrolment.';
-$string['expirymessageenrollersubject'] = 'Enrolment expiry notification';
-$string['expirymessageenrollerbody'] = 'Enrolment in the course \'{$a->course}\' will expire within the next {$a->threshold} for the following users:
-
-{$a->users}
-
-To extend their enrolment, go to {$a->extendurl}';
-$string['expirymessageenrolledsubject'] = 'Enrolment expiry notification';
 $string['expirymessageenrolledbody'] = 'Dear {$a->user},
 
 This is a notification that your enrolment in the course \'{$a->course}\' is due to expire on {$a->timeend}.
 
 If you need help, please contact {$a->enroller}.';
+$string['expirymessageenrolledsubject'] = 'Enrolment expiry notification';
+$string['expirymessageenrollerbody'] = 'Enrolment in the course \'{$a->course}\' will expire within the next {$a->threshold} for the following users:
+
+{$a->users}
+
+To extend their enrolment, go to {$a->extendurl}';
+$string['expirymessageenrollersubject'] = 'Enrolment expiry notification';
 $string['groupkey'] = 'Use group enrolment keys';
 $string['groupkey_desc'] = 'Use group enrolment keys by default.';
 $string['groupkey_help'] = 'In addition to restricting access to the course to only those who know the key, use of group enrolment keys means users are automatically added to groups when they enrol in the course.
@@ -93,6 +93,7 @@ $string['newenrols_help'] = 'This setting determines whether a user can enrol in
 $string['not_set'] = 'Not set';
 $string['pluginname'] = 'Course credit enrolment';
 $string['pluginname_desc'] = '';
+$string['privacy:metadata'] = 'The Course Credit enrolment plugin does not store any personal data.';
 $string['profile_field_map'] = 'Profile field mapping';
 $string['profile_field_map_help'] = 'Select the profile field that stores course credits on user profiles.';
 $string['purchase'] = 'Purchase';
@@ -116,4 +117,3 @@ $string['welcometocoursetext'] = 'Welcome to {$a->coursename}!
 If you have not done so already, you should edit your profile page so that we can learn more about you:
 
   {$a->profileurl}';
-$string['privacy:metadata'] = 'The Course Credit enrolment plugin does not store any personal data.';

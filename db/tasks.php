@@ -22,11 +22,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 defined('MOODLE_INTERNAL') || die();
 
-$tasks = array(
-    array(
+$tasks = [
+    [
         'classname' => '\enrol_credit\task\sync_enrolments',
         'blocking' => 0,
         'minute' => '*/10',
@@ -34,9 +33,9 @@ $tasks = array(
         'day' => '*',
         'month' => '*',
         'dayofweek' => '*',
-        'disabled' => 0
-    ),
-    array(
+        'disabled' => 0,
+    ],
+    [
         'classname' => '\enrol_credit\task\send_expiry_notifications',
         'blocking' => 0,
         'minute' => '*/10',
@@ -44,7 +43,6 @@ $tasks = array(
         'day' => '*',
         'month' => '*',
         'dayofweek' => '*',
-        'disabled' => 0
-    )
-);
-
+        'disabled' => 0,
+    ],
+];
