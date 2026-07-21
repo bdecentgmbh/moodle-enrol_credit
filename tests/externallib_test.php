@@ -145,6 +145,8 @@ final class externallib_test extends \advanced_testcase {
         $this->assertEquals($instance->id, $result['id']);
         $this->assertEquals($course->id, $result['courseid']);
         $this->assertEquals('credit', $result['type']);
+        $this->assertEquals(20, $result['cost']);
+        $this->assertEquals(100, $result['usercredits']);
     }
 
     /**

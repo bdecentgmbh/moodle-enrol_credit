@@ -95,6 +95,8 @@ class enrol_credit_external extends external_api {
                 'type' => new external_value(PARAM_PLUGIN, 'type of enrolment plugin'),
                 'name' => new external_value(PARAM_RAW, 'name of enrolment plugin'),
                 'status' => new external_value(PARAM_RAW, 'status of enrolment plugin'),
+                'cost' => new external_value(PARAM_INT, 'credit cost of the course', VALUE_OPTIONAL),
+                'usercredits' => new external_value(PARAM_INT, 'credit balance of the current user', VALUE_OPTIONAL),
                 'enrolpassword' => new external_value(PARAM_RAW, 'password required for enrolment', VALUE_OPTIONAL),
             ]
         );

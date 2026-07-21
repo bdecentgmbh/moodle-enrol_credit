@@ -363,6 +363,53 @@ final class lib_test extends \advanced_testcase {
     }
 
     /**
+     * A second enrolment attempt for the same instance never charges twice.
+     *
+     * @return void
+     */
+    public function test_enrol_self_no_double_charge(): void {
+        $this->resetAfterTest();
+        $this->enable_plugin();
+        $this->setup_credit_field();
+
+        [$course, $instance, $plugin] = $this->create_course_with_instance(20);
+
+        $user = $this->getDataGenerator()->create_user();
+        enrol_credit_plugin::add_credits($user->id, 100);
+        $this->setUser($user);
+
+        $this->assertTrue($plugin->enrol_self($instance, $user));
+        $this->assertEquals(80, enrol_credit_plugin::get_user_credits($user->id));
+
+        // A double submission finds the user already enrolled: success, no charge.
+        $this->assertTrue($plugin->enrol_self($instance, $user));
+        $this->assertEquals(80, enrol_credit_plugin::get_user_credits($user->id));
+        $this->assertTrue(is_enrolled(context_course::instance($course->id), $user));
+    }
+
+    /**
+     * Enrolment info exposes the credit cost and the user's balance.
+     *
+     * @return void
+     */
+    public function test_get_enrol_info_cost_and_balance(): void {
+        $this->resetAfterTest();
+        $this->enable_plugin();
+        $this->setup_credit_field();
+
+        [$course, $instance, $plugin] = $this->create_course_with_instance(20);
+
+        $user = $this->getDataGenerator()->create_user();
+        enrol_credit_plugin::add_credits($user->id, 100);
+        $this->setUser($user);
+
+        $info = $plugin->get_enrol_info($instance);
+        $this->assertEquals(20, $info->cost);
+        $this->assertEquals(100, $info->usercredits);
+        $this->assertTrue($info->status);
+    }
+
+    /**
      * Instance validation rejects a negative credit cost.
      *
      * @return void

@@ -15,18 +15,33 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Credit enrolment plugin version specification.
+ * Moodle App support declaration for the credit enrolment plugin.
+ *
+ * Requires Moodle App 4.3 or later (CoreEnrolDelegate).
  *
  * @package    enrol_credit
- * @copyright  2021 bdecent gmbh <https://bdecent.de>
+ * @copyright  2026 bdecent gmbh <https://bdecent.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026072101; // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2025041400; // Requires this Moodle version (5.0).
-$plugin->supported = [500, 502]; // Supports Moodle 5.0 to 5.2.
-$plugin->component = 'enrol_credit'; // Full name of the plugin (used for diagnostics).
-$plugin->release   = '1.3';
-$plugin->maturity = MATURITY_STABLE;
+$addons = [
+    'enrol_credit' => [
+        'handlers' => [
+            'credit' => [
+                'delegate' => 'CoreEnrolDelegate',
+                'enrolmentAction' => 'self',
+                'method' => 'mobile_enrol',
+            ],
+        ],
+        'lang' => [
+            ['pluginname', 'enrol_credit'],
+            ['checkout', 'enrol_credit'],
+            ['purchase', 'enrol_credit'],
+            ['canntenrol', 'enrol_credit'],
+            ['insufficient_credits', 'enrol_credit'],
+            ['enrolfailed', 'enrol_credit'],
+        ],
+    ],
+];

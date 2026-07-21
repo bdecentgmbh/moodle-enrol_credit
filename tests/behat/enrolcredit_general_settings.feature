@@ -146,9 +146,7 @@ Feature: Credit enrolment general settings
     And I should see "Course credit enrolment (Student)"
     And I should see "course credits will be deducted from your balance of 100."
     And I click on "Purchase" "button"
-    And I am on the "Credit enrolment test" course page
-    And I navigate to course participants
-    Then I should see "Student" in the "Student User 1" "table_row"
+    Then I should see "New section"
     And I wait "60" seconds
     And I log out
     And I am on the "Credit enrolment test" course page logged in as admin

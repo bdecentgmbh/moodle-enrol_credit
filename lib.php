@@ -179,22 +179,39 @@ class enrol_credit_plugin extends enrol_plugin {
      * @since 1.0
      */
     public function enrol_self(stdClass $instance, \stdClass $user, $data = null) {
+        global $DB;
 
         $amount = $instance->customint7 != null ? (int) $instance->customint7 : 0;
-        if (!self::deduct_credits($user->id, $amount)) {
-            // The balance changed since it was checked (e.g. a concurrent enrolment
-            // spent the credits) - do not enrol without payment.
+
+        if (!$lock = self::get_credits_lock($user->id)) {
             return false;
         }
+        try {
+            // The enrolment check, the deduction and the enrolment itself all happen
+            // while holding the per-user credits lock: a concurrent submission can
+            // neither charge the user twice for the same instance nor overdraw them.
+            if ($DB->record_exists('user_enrolments', ['enrolid' => $instance->id, 'userid' => $user->id])) {
+                // Already enrolled (e.g. a double submission) - nothing to charge.
+                return true;
+            }
 
-        $timestart = time();
-        if ($instance->enrolperiod) {
-            $timeend = $timestart + $instance->enrolperiod;
-        } else {
-            $timeend = 0;
+            if (!self::deduct_credits_locked($user->id, $amount)) {
+                // The balance changed since it was checked (e.g. a concurrent enrolment
+                // in another course spent the credits) - do not enrol without payment.
+                return false;
+            }
+
+            $timestart = time();
+            if ($instance->enrolperiod) {
+                $timeend = $timestart + $instance->enrolperiod;
+            } else {
+                $timeend = 0;
+            }
+
+            $this->enrol_user($instance, $user->id, $instance->roleid, $timestart, $timeend);
+        } finally {
+            $lock->release();
         }
-
-        $this->enrol_user($instance, $user->id, $instance->roleid, $timestart, $timeend);
 
         // Send welcome message.
         if ($instance->customint4 != ENROL_DO_NOT_SEND_EMAIL) {
@@ -336,6 +353,7 @@ class enrol_credit_plugin extends enrol_plugin {
      * @since 1.0
      */
     public function get_enrol_info(stdClass $instance) {
+        global $USER;
 
         $instanceinfo = new stdClass();
         $instanceinfo->id = $instance->id;
@@ -343,6 +361,8 @@ class enrol_credit_plugin extends enrol_plugin {
         $instanceinfo->type = $this->get_name();
         $instanceinfo->name = $this->get_instance_name($instance);
         $instanceinfo->status = $this->can_self_enrol($instance);
+        $instanceinfo->cost = $instance->customint7 != null ? (int) $instance->customint7 : 0;
+        $instanceinfo->usercredits = self::get_user_credits($USER->id);
 
         return $instanceinfo;
     }
@@ -1114,11 +1134,34 @@ class enrol_credit_plugin extends enrol_plugin {
      * @throws dml_exception
      */
     public static function deduct_credits($userid, int $amount) {
-        global $DB;
-
         if ($amount < 0) {
             throw new coding_exception('The amount of credits to deduct must not be negative.');
         }
+        if ($amount == 0) {
+            return true;
+        }
+
+        if (!$lock = self::get_credits_lock($userid)) {
+            return false;
+        }
+        try {
+            return self::deduct_credits_locked($userid, $amount);
+        } finally {
+            $lock->release();
+        }
+    }
+
+    /**
+     * Deduct credits while the caller already holds the per-user credits lock.
+     *
+     * @param int $userid
+     * @param int $amount non-negative amount to deduct
+     * @return bool true if the credits were deducted, false if the user cannot afford it
+     * @throws dml_exception
+     */
+    protected static function deduct_credits_locked($userid, int $amount) {
+        global $DB;
+
         if ($amount == 0) {
             return true;
         }
@@ -1128,21 +1171,14 @@ class enrol_credit_plugin extends enrol_plugin {
             return false;
         }
 
-        if (!$lock = self::get_credits_lock($userid)) {
+        $data = $DB->get_record('user_info_data', ['userid' => $userid, 'fieldid' => $field]);
+        $current = ($data && is_numeric($data->data)) ? (int) $data->data : 0;
+        if ($current < $amount) {
             return false;
         }
-        try {
-            $data = $DB->get_record('user_info_data', ['userid' => $userid, 'fieldid' => $field]);
-            $current = ($data && is_numeric($data->data)) ? (int) $data->data : 0;
-            if ($current < $amount) {
-                return false;
-            }
-            $data->data = $current - $amount;
-            $DB->update_record('user_info_data', $data);
-            return true;
-        } finally {
-            $lock->release();
-        }
+        $data->data = $current - $amount;
+        $DB->update_record('user_info_data', $data);
+        return true;
     }
 
     /**

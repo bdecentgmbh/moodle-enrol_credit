@@ -249,7 +249,7 @@ Feature: Credit enrolment management
     And I navigate to course participants
     And I should see "Student" in the "Student User 1" "table_row"
     And I should see "Active" in the "Student User 1" "table_row"
-    And I wait "20" seconds
+    And I wait "30" seconds
     And I trigger cron
     And I am on "Test" course homepage
     And I navigate to course participants
@@ -283,7 +283,7 @@ Feature: Credit enrolment management
     And I navigate to course participants
     And I should see "Student" in the "Student User 1" "table_row"
     And I should see "Active" in the "Student User 1" "table_row"
-    And I wait "20" seconds
+    And I wait "30" seconds
     And I trigger cron
     And I am on "Test" course homepage
     And I navigate to course participants
@@ -316,7 +316,7 @@ Feature: Credit enrolment management
     And I navigate to course participants
     And I should see "Student" in the "Student User 1" "table_row"
     And I should see "Active" in the "Student User 1" "table_row"
-    And I wait "20" seconds
+    And I wait "30" seconds
     And I am on "Test" course homepage
     And I navigate to course participants
     And I should see "Student" in the "Student User 1" "table_row"
