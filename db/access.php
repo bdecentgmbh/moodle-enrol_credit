@@ -36,6 +36,17 @@ $capabilities = [
         ],
     ],
 
+    /* Add or remove course credits on user accounts, e.g. via the credit_users web service. */
+    'enrol/credit:managecredits' => [
+
+        'riskbitmask' => RISK_PERSONAL,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+
     /* Manage user credit-enrolments. */
     'enrol/credit:manage' => [
 

@@ -174,14 +174,18 @@ class enrol_credit_plugin extends enrol_plugin {
      * @param stdClass $instance enrolment instance
      * @param stdClass $user User to enrol and deduct credits from
      * @param stdClass $data data needed for enrolment.
-     * @return bool|array true if enroled else eddor code and messege
+     * @return bool true if the user was enrolled, false if the credits could not be deducted
      * @throws \coding_exception
      * @since 1.0
      */
     public function enrol_self(stdClass $instance, \stdClass $user, $data = null) {
 
-        $amount = $instance->customint7 != null ? $instance->customint7 : 0;
-        self::deduct_credits($user->id, $amount);
+        $amount = $instance->customint7 != null ? (int) $instance->customint7 : 0;
+        if (!self::deduct_credits($user->id, $amount)) {
+            // The balance changed since it was checked (e.g. a concurrent enrolment
+            // spent the credits) - do not enrol without payment.
+            return false;
+        }
 
         $timestart = time();
         if ($instance->enrolperiod) {
@@ -222,7 +226,12 @@ class enrol_credit_plugin extends enrol_plugin {
             if ($instance->id == $instanceid) {
                 // If form validates user can purchase enrolment with credits.
                 if ($data = $form->get_data()) {
-                    $this->enrol_self($instance, $USER, $data);
+                    if (!$this->enrol_self($instance, $USER, $data)) {
+                        \core\notification::error(get_string('insufficient_credits', 'enrol_credit', [
+                            'credit_cost' => $instance->customint7,
+                            'user_credits' => self::get_user_credits($USER->id),
+                        ]));
+                    }
                 }
             }
         } else {
@@ -478,9 +487,9 @@ class enrol_credit_plugin extends enrol_plugin {
             $userid = $instance->userid;
             unset($instance->userid);
             $this->unenrol_user($instance, $userid);
-            $days = $instance->customint2 / 60 * 60 * 24;
-            $trace->output("unenrolling user $userid from course $instance->courseid as they have did not log in for at
-                least $days days", 1);
+            $days = $instance->customint2 / DAYSECS;
+            $trace->output("unenrolling user $userid from course $instance->courseid " .
+                "as they did not log in for at least $days days", 1);
         }
         $rs->close();
 
@@ -496,9 +505,9 @@ class enrol_credit_plugin extends enrol_plugin {
             $userid = $instance->userid;
             unset($instance->userid);
             $this->unenrol_user($instance, $userid);
-                $days = $instance->customint2 / 60 * 60 * 24;
-            $trace->output("unenrolling user $userid from course $instance->courseid as they have did not access course
-                for at least $days days", 1);
+            $days = $instance->customint2 / DAYSECS;
+            $trace->output("unenrolling user $userid from course $instance->courseid " .
+                "as they did not access the course for at least $days days", 1);
         }
         $rs->close();
 
@@ -893,6 +902,11 @@ class enrol_credit_plugin extends enrol_plugin {
             $errors['expirythreshold'] = get_string('errorthresholdlow', 'core_enrol');
         }
 
+        if (isset($data['customint7']) && (!is_numeric($data['customint7']) || $data['customint7'] < 0)) {
+            // A negative cost would add credits on enrolment instead of deducting them.
+            $errors['customint7'] = get_string('error_creditcost', 'enrol_credit');
+        }
+
         // Now these ones are checked by quickforms, but we may be called by the upload enrolments tool, or a webservive.
         if (core_text::strlen($data['name']) > 255) {
             $errors['name'] = get_string('err_maxlength', 'form', 255);
@@ -1061,7 +1075,7 @@ class enrol_credit_plugin extends enrol_plugin {
      * Get number of credits available to user.
      *
      * @param int $userid
-     * @return int|mixed
+     * @return int
      * @throws dml_exception
      */
     public static function get_user_credits($userid) {
@@ -1071,31 +1085,63 @@ class enrol_credit_plugin extends enrol_plugin {
             return 0;
         }
 
-        if (!$data = $DB->get_field('user_info_data', 'data', ['userid' => $userid, 'fieldid' => $fieldid])) {
-            if (!is_numeric($data)) {
-                return 0;
-            }
-        }
+        $data = $DB->get_field('user_info_data', 'data', ['userid' => $userid, 'fieldid' => $fieldid]);
 
-        return $data;
+        return is_numeric($data) ? (int) $data : 0;
+    }
+
+    /**
+     * Get a lock serialising credit balance changes for one user.
+     *
+     * @param int $userid
+     * @return \core\lock\lock|false the held lock, or false if it could not be obtained
+     */
+    protected static function get_credits_lock($userid) {
+        $lockfactory = \core\lock\lock_config::get_lock_factory('enrol_credit');
+        return $lockfactory->get_lock('credits_' . $userid, 10);
     }
 
     /**
      * Reduce the amount of credits used to enrol into course from user record.
      *
+     * The balance is re-checked while holding a per-user lock, so concurrent
+     * enrolments cannot spend the same credits twice or drive the balance negative.
+     *
      * @param int $userid
      * @param int $amount
+     * @return bool true if the credits were deducted, false if the user cannot afford it
+     * @throws coding_exception
      * @throws dml_exception
      */
     public static function deduct_credits($userid, int $amount) {
         global $DB;
 
-        $field = get_config('enrol_credit', 'credit_field');
-        if ($DB->record_exists('user_info_data', ['userid' => $userid, 'fieldid' => $field])) {
-            $data = $DB->get_record('user_info_data', [ 'userid' => $userid, 'fieldid' => $field], '*', MUST_EXIST);
-            $data->data = intval($data->data) - $amount;
+        if ($amount < 0) {
+            throw new coding_exception('The amount of credits to deduct must not be negative.');
+        }
+        if ($amount == 0) {
+            return true;
+        }
 
+        $field = get_config('enrol_credit', 'credit_field');
+        if (!$field) {
+            return false;
+        }
+
+        if (!$lock = self::get_credits_lock($userid)) {
+            return false;
+        }
+        try {
+            $data = $DB->get_record('user_info_data', ['userid' => $userid, 'fieldid' => $field]);
+            $current = ($data && is_numeric($data->data)) ? (int) $data->data : 0;
+            if ($current < $amount) {
+                return false;
+            }
+            $data->data = $current - $amount;
             $DB->update_record('user_info_data', $data);
+            return true;
+        } finally {
+            $lock->release();
         }
     }
 
@@ -1104,28 +1150,44 @@ class enrol_credit_plugin extends enrol_plugin {
      *
      * @param int $userid
      * @param int $credits
+     * @return bool true if the credits were added
+     * @throws coding_exception
      * @throws dml_exception
      */
     public static function add_credits($userid, $credits) {
         global $DB;
 
-        if (
-            !$data = $DB->get_record('user_info_data', [
-                'userid' => $userid,
-                'fieldid' => get_config('enrol_credit', 'credit_field')])
-        ) {
-            $data = new \stdClass();
-            $data->fieldid = get_config('enrol_credit', 'credit_field');
-            $data->userid = $userid;
-            $data->data = 0;
+        if ($credits < 0) {
+            throw new coding_exception('The amount of credits to add must not be negative.');
         }
 
-        $data->data = intval($data->data) + $credits;
+        $field = get_config('enrol_credit', 'credit_field');
+        if (!$field) {
+            return false;
+        }
 
-        if (isset($data->id)) {
-            $DB->update_record('user_info_data', $data);
-        } else {
-            $DB->insert_record('user_info_data', $data);
+        if (!$lock = self::get_credits_lock($userid)) {
+            return false;
+        }
+        try {
+            if (!$data = $DB->get_record('user_info_data', ['userid' => $userid, 'fieldid' => $field])) {
+                $data = new \stdClass();
+                $data->fieldid = $field;
+                $data->userid = $userid;
+                $data->data = 0;
+            }
+
+            $current = is_numeric($data->data) ? (int) $data->data : 0;
+            $data->data = $current + $credits;
+
+            if (isset($data->id)) {
+                $DB->update_record('user_info_data', $data);
+            } else {
+                $DB->insert_record('user_info_data', $data);
+            }
+            return true;
+        } finally {
+            $lock->release();
         }
     }
 }

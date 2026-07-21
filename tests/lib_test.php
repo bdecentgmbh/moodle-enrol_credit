@@ -265,6 +265,130 @@ final class lib_test extends \advanced_testcase {
     }
 
     /**
+     * Deduction fails and leaves the balance untouched when credits are insufficient.
+     *
+     * @return void
+     */
+    public function test_deduct_credits_insufficient(): void {
+        $this->resetAfterTest();
+        $this->enable_plugin();
+        $this->setup_credit_field();
+
+        $user = $this->getDataGenerator()->create_user();
+        enrol_credit_plugin::add_credits($user->id, 10);
+
+        $this->assertFalse(enrol_credit_plugin::deduct_credits($user->id, 20));
+        $this->assertEquals(10, enrol_credit_plugin::get_user_credits($user->id));
+
+        $this->assertTrue(enrol_credit_plugin::deduct_credits($user->id, 10));
+        $this->assertEquals(0, enrol_credit_plugin::get_user_credits($user->id));
+    }
+
+    /**
+     * Negative amounts are rejected outright.
+     *
+     * @return void
+     */
+    public function test_deduct_credits_negative_rejected(): void {
+        $this->resetAfterTest();
+        $this->enable_plugin();
+        $this->setup_credit_field();
+
+        $user = $this->getDataGenerator()->create_user();
+
+        $this->expectException(\coding_exception::class);
+        enrol_credit_plugin::deduct_credits($user->id, -5);
+    }
+
+    /**
+     * Negative additions are rejected outright.
+     *
+     * @return void
+     */
+    public function test_add_credits_negative_rejected(): void {
+        $this->resetAfterTest();
+        $this->enable_plugin();
+        $this->setup_credit_field();
+
+        $user = $this->getDataGenerator()->create_user();
+
+        $this->expectException(\coding_exception::class);
+        enrol_credit_plugin::add_credits($user->id, -5);
+    }
+
+    /**
+     * A non-numeric profile field value is treated as a zero balance.
+     *
+     * @return void
+     */
+    public function test_get_user_credits_non_numeric(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->enable_plugin();
+        $field = $this->setup_credit_field();
+
+        $user = $this->getDataGenerator()->create_user();
+        $DB->insert_record('user_info_data', (object) [
+            'userid' => $user->id,
+            'fieldid' => $field->id,
+            'data' => 'not a number',
+        ]);
+
+        $this->assertEquals(0, enrol_credit_plugin::get_user_credits($user->id));
+    }
+
+    /**
+     * Self enrolment is refused, without enrolling, when the balance is insufficient.
+     *
+     * This simulates the race where credits are spent between the can_self_enrol()
+     * check and the actual enrolment.
+     *
+     * @return void
+     */
+    public function test_enrol_self_insufficient_credits(): void {
+        $this->resetAfterTest();
+        $this->enable_plugin();
+        $this->setup_credit_field();
+
+        [$course, $instance, $plugin] = $this->create_course_with_instance(20);
+
+        $user = $this->getDataGenerator()->create_user();
+        enrol_credit_plugin::add_credits($user->id, 10);
+        $this->setUser($user);
+
+        $this->assertFalse($plugin->enrol_self($instance, $user));
+        $this->assertFalse(is_enrolled(context_course::instance($course->id), $user));
+        $this->assertEquals(10, enrol_credit_plugin::get_user_credits($user->id));
+    }
+
+    /**
+     * Instance validation rejects a negative credit cost.
+     *
+     * @return void
+     */
+    public function test_edit_instance_validation_negative_cost(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->enable_plugin();
+
+        [$course, $instance, $plugin] = $this->create_course_with_instance(20);
+        $context = context_course::instance($course->id);
+
+        $data = (array) $instance;
+        $data['expirynotify'] = 0;
+        $data['customint7'] = -5;
+
+        $errors = $plugin->edit_instance_validation($data, [], $instance, $context);
+        $this->assertArrayHasKey('customint7', $errors);
+
+        $data['customint7'] = 5;
+        $errors = $plugin->edit_instance_validation($data, [], $instance, $context);
+        $this->assertArrayNotHasKey('customint7', $errors);
+    }
+
+    /**
      * Sync does not throw errors when there is nothing to do.
      *
      * @return void

@@ -167,4 +167,107 @@ final class externallib_test extends \advanced_testcase {
         $this->assertTrue($result['status']);
         $this->assertEquals(30, enrol_credit_plugin::get_user_credits($user->id));
     }
+
+    /**
+     * Users holding the managecredits capability may call the service.
+     *
+     * @return void
+     */
+    public function test_credit_users_with_capability(): void {
+        $this->resetAfterTest();
+        $this->setup_plugin();
+
+        $syscontext = \context_system::instance();
+        $caller = $this->getDataGenerator()->create_user();
+        $roleid = $this->getDataGenerator()->create_role();
+        assign_capability('enrol/credit:managecredits', CAP_ALLOW, $roleid, $syscontext->id);
+        role_assign($roleid, $caller->id, $syscontext->id);
+        $this->setUser($caller);
+
+        $target = $this->getDataGenerator()->create_user();
+        $result = enrol_credit_external::credit_users([
+            ['userid' => $target->id, 'credit' => 5, 'quantity' => 2],
+        ]);
+        $result = \core_external\external_api::clean_returnvalue(enrol_credit_external::credit_users_returns(), $result);
+
+        $this->assertTrue($result['status']);
+        $this->assertEquals(10, enrol_credit_plugin::get_user_credits($target->id));
+    }
+
+    /**
+     * Users without the managecredits capability are rejected.
+     *
+     * @return void
+     */
+    public function test_credit_users_without_capability(): void {
+        $this->resetAfterTest();
+        $this->setup_plugin();
+
+        $caller = $this->getDataGenerator()->create_user();
+        $target = $this->getDataGenerator()->create_user();
+        $this->setUser($caller);
+
+        $this->expectException(\required_capability_exception::class);
+        enrol_credit_external::credit_users([
+            ['userid' => $target->id, 'credit' => 10, 'quantity' => 1],
+        ]);
+    }
+
+    /**
+     * Negative credit amounts are rejected even for authorised callers.
+     *
+     * @return void
+     */
+    public function test_credit_users_rejects_negative(): void {
+        $this->resetAfterTest();
+        $this->setup_plugin();
+        $this->setAdminUser();
+
+        $target = $this->getDataGenerator()->create_user();
+
+        $this->expectException(\invalid_parameter_exception::class);
+        enrol_credit_external::credit_users([
+            ['userid' => $target->id, 'credit' => -10, 'quantity' => 1],
+        ]);
+    }
+
+    /**
+     * Crediting a nonexistent user is rejected.
+     *
+     * @return void
+     */
+    public function test_credit_users_rejects_missing_user(): void {
+        $this->resetAfterTest();
+        $this->setup_plugin();
+        $this->setAdminUser();
+
+        $this->expectException(\dml_missing_record_exception::class);
+        enrol_credit_external::credit_users([
+            ['userid' => -1, 'credit' => 10, 'quantity' => 1],
+        ]);
+    }
+
+    /**
+     * The web service refuses enrolment when the balance is insufficient at
+     * deduction time, reporting a warning instead of enrolling.
+     *
+     * @return void
+     */
+    public function test_enrol_user_race_insufficient(): void {
+        $this->resetAfterTest();
+        $this->setup_plugin();
+
+        [$course, $instance] = $this->create_course_with_instance(0);
+
+        // Cost 0 passes can_self_enrol with zero balance; then raise the cost
+        // directly on the instance record to simulate the race between the
+        // check and the deduction.
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $instance->customint7 = 20;
+        $plugin = enrol_get_plugin('credit');
+        $this->assertFalse($plugin->enrol_self($instance, $user));
+        $this->assertFalse(is_enrolled(\context_course::instance($course->id), $user));
+    }
 }

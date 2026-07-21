@@ -181,10 +181,22 @@ class enrol_credit_external extends external_api {
         foreach ($instances as $instance) {
             $enrolstatus = $enrol->can_self_enrol($instance);
             if ($enrolstatus === true) {
-                // Do the enrolment, deducting the credit cost from the user.
-                $enrol->enrol_self($instance, $USER);
-                $enrolled = true;
-                break;
+                // Do the enrolment, deducting the credit cost from the user. The deduction
+                // is atomic and re-checks the balance, so a concurrent enrolment cannot
+                // spend the same credits twice.
+                if ($enrol->enrol_self($instance, $USER)) {
+                    $enrolled = true;
+                    break;
+                }
+                $warnings[] = [
+                    'item' => 'instance',
+                    'itemid' => $instance->id,
+                    'warningcode' => '2',
+                    'message' => get_string('insufficient_credits', 'enrol_credit', [
+                        'credit_cost' => $instance->customint7,
+                        'user_credits' => enrol_credit_plugin::get_user_credits($USER->id),
+                    ]),
+                ];
             } else {
                 $warnings[] = [
                     'item' => 'instance',
@@ -239,14 +251,14 @@ class enrol_credit_external extends external_api {
     }
 
     /**
-     * Enrolment of users.
+     * Add course credits to the given users.
      *
-     * Function throw an exception at the first error encountered.
-     * @param array $coursecredits Credits for the course to enrol.
+     * Function throws an exception at the first error encountered.
+     * @param array $coursecredits Credits to add per user.
      * @since Moodle 2.2
      */
     public static function credit_users($coursecredits) {
-        global $DB, $CFG;
+        global $CFG;
 
         require_once($CFG->dirroot . '/enrol/credit/lib.php');
 
@@ -255,7 +267,17 @@ class enrol_credit_external extends external_api {
             ['credits' => $coursecredits]
         );
 
-        foreach ($coursecredits as $coursecredit) {
+        self::validate_context(context_system::instance());
+        require_capability('enrol/credit:managecredits', context_system::instance());
+
+        foreach ($params['credits'] as $coursecredit) {
+            if ($coursecredit['credit'] < 0 || $coursecredit['quantity'] < 1) {
+                throw new invalid_parameter_exception('Credit must not be negative and quantity must be at least 1.');
+            }
+            // Ensure the target user exists and is neither deleted nor the guest user.
+            $user = core_user::get_user($coursecredit['userid'], '*', MUST_EXIST);
+            core_user::require_active_user($user);
+
             enrol_credit_plugin::add_credits($coursecredit['userid'], $coursecredit['credit'] * $coursecredit['quantity']);
         }
         $result = [];
