@@ -32,7 +32,6 @@ namespace enrol_credit;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class deleteselectedusers_operation extends \enrol_bulk_enrolment_operation {
-
     /**
      * Returns the title to display for this bulk operation.
      *
@@ -58,10 +57,10 @@ class deleteselectedusers_operation extends \enrol_bulk_enrolment_operation {
      *
      * @param string|\moodle_url|null $defaultaction
      * @param mixed $defaultcustomdata
-     * @return \enrol_manual_editselectedusers_form
+     * @return \enrol_credit\deleteselectedusers_form
      */
     public function get_form($defaultaction = null, $defaultcustomdata = null) {
-        if (![$defaultcustomdata]) {
+        if (!is_array($defaultcustomdata)) {
             $defaultcustomdata = [];
         }
         $defaultcustomdata['title'] = $this->get_title();

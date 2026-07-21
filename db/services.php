@@ -32,6 +32,7 @@ $functions = [
         'classpath'   => 'enrol/credit/externallib.php',
         'description' => 'credit enrolment instance information.',
         'type'        => 'read',
+        'loginrequired' => true,
         'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
@@ -41,6 +42,7 @@ $functions = [
         'classpath'   => 'enrol/credit/externallib.php',
         'description' => 'credit enrol the current user in the given course.',
         'type'        => 'write',
+        'loginrequired' => true,
         'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
@@ -50,6 +52,8 @@ $functions = [
         'classpath'   => 'enrol/credit/externallib.php',
         'description' => 'credit the provided users with course credits.',
         'type'        => 'write',
+        'capabilities' => 'enrol/credit:managecredits',
+        'loginrequired' => true,
         'services'    => [],
     ],
 ];

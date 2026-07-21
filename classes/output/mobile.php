@@ -15,18 +15,33 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Credit enrolment plugin version specification.
+ * Mobile output class for the credit enrolment plugin.
  *
  * @package    enrol_credit
- * @copyright  2021 bdecent gmbh <https://bdecent.de>
+ * @copyright  2026 bdecent gmbh <https://bdecent.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace enrol_credit\output;
 
-$plugin->version   = 2026072102; // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2025041400; // Requires this Moodle version (5.0).
-$plugin->supported = [500, 502]; // Supports Moodle 5.0 to 5.2.
-$plugin->component = 'enrol_credit'; // Full name of the plugin (used for diagnostics).
-$plugin->release   = '1.3';
-$plugin->maturity = MATURITY_STABLE;
+/**
+ * Provides the JavaScript implementing the Moodle App enrolment handler.
+ */
+class mobile {
+    /**
+     * Return the JavaScript implementing app support for credit enrolment.
+     *
+     * @param array $args Arguments from tool_mobile_get_content WS
+     * @return array HTML, javascript and other data
+     */
+    public static function mobile_enrol($args) {
+        global $CFG;
+
+        return [
+            'templates' => [],
+            'javascript' => file_get_contents($CFG->dirroot . '/enrol/credit/mobileapp/mobile.js'),
+            'otherdata' => '',
+            'files' => '',
+        ];
+    }
+}

@@ -1,6 +1,6 @@
 name: Moodle Plugin CI
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   test:
@@ -8,7 +8,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:13
+        image: postgres:${{ matrix.pgsql || 14 }}
         env:
           POSTGRES_USER: 'postgres'
           POSTGRES_HOST_AUTH_METHOD: 'trust'
@@ -16,7 +16,7 @@ jobs:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 3
       mariadb:
-        image: mariadb:10.6.7
+        image: mariadb:10.11
         env:
           MYSQL_USER: 'root'
           MYSQL_ALLOW_EMPTY_PASSWORD: "true"
@@ -28,16 +28,29 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - php: '8.3'
-            moodle-branch: 'MOODLE_405_STABLE'
+          # Moodle 5.0 requires PostgreSQL 14, 5.1 requires 15, 5.2 requires 16.
+          - php: '8.2'
+            moodle-branch: 'MOODLE_500_STABLE'
             database: 'pgsql'
+            pgsql: 14
           - php: '8.3'
-            moodle-branch: 'MOODLE_405_STABLE'
+            moodle-branch: 'MOODLE_500_STABLE'
+            database: 'mariadb'
+          - php: '8.3'
+            moodle-branch: 'MOODLE_501_STABLE'
+            database: 'pgsql'
+            pgsql: 15
+          - php: '8.4'
+            moodle-branch: 'MOODLE_502_STABLE'
+            database: 'pgsql'
+            pgsql: 16
+          - php: '8.4'
+            moodle-branch: 'MOODLE_502_STABLE'
             database: 'mariadb'
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: plugin
 
@@ -50,7 +63,7 @@ jobs:
 
       - name: Initialise moodle-plugin-ci
         run: |
-          composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^3
+          composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^4
           echo $(cd ci/bin; pwd) >> $GITHUB_PATH
           echo $(cd ci/vendor/bin; pwd) >> $GITHUB_PATH
           sudo locale-gen en_AU.UTF-8
@@ -65,10 +78,6 @@ jobs:
       - name: PHP Lint
         if: ${{ always() }}
         run: moodle-plugin-ci phplint
-
-      - name: PHP Copy/Paste Detector
-        if: ${{ always() }}
-        run: moodle-plugin-ci phpcpd
 
       - name: PHP Mess Detector
         if: ${{ always() }}

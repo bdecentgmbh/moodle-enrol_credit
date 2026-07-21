@@ -47,7 +47,7 @@ Feature: Credit enrolment management
     And I press "Save and display"
     And I am on the "Credit enrolment test" "enrolment methods" page
     And I should see "Course credit enrolment (Student)" in the "generaltable" "table"
-    And "Disable" "icon" should exist in the "Course credit enrolment (Student)" "table_row"
+    And "Disable" "link" should exist in the "Course credit enrolment (Student)" "table_row"
     And I click on "Edit" "link" in the "Course credit enrolment (Student)" "table_row"
     And I set the field "Credit cost" to "20"
     And I press "Save changes"
@@ -56,7 +56,9 @@ Feature: Credit enrolment management
     And I should see "Course credit enrolment (Student)"
     And I should see "20 course credits will be deducted from your balance of 100."
     And I click on "Purchase" "button"
-    And I am on the "Credit enrolment test" course page
+    Then I should see "New section"
+    And I log out
+    And I am on the "Credit enrolment test" course page logged in as admin
     And I navigate to course participants
     And I should see "Student" in the "Student User 1" "table_row"
     And I log out
@@ -106,7 +108,7 @@ Feature: Credit enrolment management
     And I am on the "Test" course page logged in as admin
     And I am on the "Test" "enrolment methods" page
     And I should see "Course credit enrolment (Student)" in the "generaltable" "table"
-    And "Disable" "icon" should exist in the "Course credit enrolment (Student)" "table_row"
+    And "Disable" "link" should exist in the "Course credit enrolment (Student)" "table_row"
     And I click on "Edit" "link" in the "Course credit enrolment (Student)" "table_row"
     And I set the field "Credit cost" to "20"
     And I set the following fields to these values:
@@ -145,7 +147,7 @@ Feature: Credit enrolment management
     And I am on the "Test" course page logged in as admin
     And I am on the "Test" "enrolment methods" page
     And I should see "Course credit enrolment (Student)" in the "generaltable" "table"
-    And "Disable" "icon" should exist in the "Course credit enrolment (Student)" "table_row"
+    And "Disable" "link" should exist in the "Course credit enrolment (Student)" "table_row"
     And I click on "Edit" "link" in the "Course credit enrolment (Student)" "table_row"
     And I set the field "Credit cost" to "20"
     And I set the following fields to these values:
@@ -247,7 +249,7 @@ Feature: Credit enrolment management
     And I navigate to course participants
     And I should see "Student" in the "Student User 1" "table_row"
     And I should see "Active" in the "Student User 1" "table_row"
-    And I wait "20" seconds
+    And I wait "30" seconds
     And I trigger cron
     And I am on "Test" course homepage
     And I navigate to course participants
@@ -281,7 +283,7 @@ Feature: Credit enrolment management
     And I navigate to course participants
     And I should see "Student" in the "Student User 1" "table_row"
     And I should see "Active" in the "Student User 1" "table_row"
-    And I wait "20" seconds
+    And I wait "30" seconds
     And I trigger cron
     And I am on "Test" course homepage
     And I navigate to course participants
@@ -314,7 +316,7 @@ Feature: Credit enrolment management
     And I navigate to course participants
     And I should see "Student" in the "Student User 1" "table_row"
     And I should see "Active" in the "Student User 1" "table_row"
-    And I wait "20" seconds
+    And I wait "30" seconds
     And I am on "Test" course homepage
     And I navigate to course participants
     And I should see "Student" in the "Student User 1" "table_row"
