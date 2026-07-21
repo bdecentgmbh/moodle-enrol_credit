@@ -8,7 +8,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:14
+        image: postgres:${{ matrix.pgsql || 14 }}
         env:
           POSTGRES_USER: 'postgres'
           POSTGRES_HOST_AUTH_METHOD: 'trust'
@@ -28,18 +28,22 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Moodle 5.0 requires PostgreSQL 14, 5.1 requires 15, 5.2 requires 16.
           - php: '8.2'
             moodle-branch: 'MOODLE_500_STABLE'
             database: 'pgsql'
+            pgsql: 14
           - php: '8.3'
             moodle-branch: 'MOODLE_500_STABLE'
             database: 'mariadb'
           - php: '8.3'
             moodle-branch: 'MOODLE_501_STABLE'
             database: 'pgsql'
+            pgsql: 15
           - php: '8.4'
             moodle-branch: 'MOODLE_502_STABLE'
             database: 'pgsql'
+            pgsql: 16
           - php: '8.4'
             moodle-branch: 'MOODLE_502_STABLE'
             database: 'mariadb'

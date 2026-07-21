@@ -944,7 +944,7 @@ class enrol_credit_plugin extends enrol_plugin {
     /**
      * Add new instance of enrol plugin.
      * @param object $course
-     * @param array $fields instance fields
+     * @param array|null $fields instance fields
      * @return int id of new instance, null if can not be created
      * @throws \coding_exception
      * @since 1.0
