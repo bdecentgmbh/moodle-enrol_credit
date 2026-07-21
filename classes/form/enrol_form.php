@@ -26,13 +26,12 @@ namespace enrol_credit\form;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir.'/formslib.php');
+require_once($CFG->libdir . '/formslib.php');
 
 /**
  * Enrol form called from course enrolment hook, Using this form user will enrol into course from course enrol page.
  */
 class enrol_form extends \moodleform {
-
     /**
      * Custom data related to the enrol plugin instance.
      *
@@ -53,7 +52,7 @@ class enrol_form extends \moodleform {
      * @return string form identifier
      */
     protected function get_form_identifier() {
-        $formid = $this->_customdata->id.'_'.get_class($this);
+        $formid = $this->_customdata->id . '_' . get_class($this);
         return $formid;
     }
 
@@ -73,8 +72,11 @@ class enrol_form extends \moodleform {
         $heading = $plugin->get_instance_name($instance);
         $mform->addElement('header', 'creditheader', $heading);
 
-        $mform->addElement('html', get_string('checkout', 'enrol_credit',
-            ['credit_cost' => $instance->customint7, 'user_credits' => \enrol_credit_plugin::get_user_credits($USER->id)]));
+        $mform->addElement('html', get_string(
+            'checkout',
+            'enrol_credit',
+            ['credit_cost' => $instance->customint7, 'user_credits' => \enrol_credit_plugin::get_user_credits($USER->id)]
+        ));
 
         $this->add_action_buttons(false, get_string('purchase', 'enrol_credit'));
 

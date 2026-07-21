@@ -47,7 +47,7 @@ Feature: Credit enrolment management
     And I press "Save and display"
     And I am on the "Credit enrolment test" "enrolment methods" page
     And I should see "Course credit enrolment (Student)" in the "generaltable" "table"
-    And "Disable" "icon" should exist in the "Course credit enrolment (Student)" "table_row"
+    And "Disable" "link" should exist in the "Course credit enrolment (Student)" "table_row"
     And I click on "Edit" "link" in the "Course credit enrolment (Student)" "table_row"
     And I set the field "Credit cost" to "20"
     And I press "Save changes"
@@ -106,7 +106,7 @@ Feature: Credit enrolment management
     And I am on the "Test" course page logged in as admin
     And I am on the "Test" "enrolment methods" page
     And I should see "Course credit enrolment (Student)" in the "generaltable" "table"
-    And "Disable" "icon" should exist in the "Course credit enrolment (Student)" "table_row"
+    And "Disable" "link" should exist in the "Course credit enrolment (Student)" "table_row"
     And I click on "Edit" "link" in the "Course credit enrolment (Student)" "table_row"
     And I set the field "Credit cost" to "20"
     And I set the following fields to these values:
@@ -145,7 +145,7 @@ Feature: Credit enrolment management
     And I am on the "Test" course page logged in as admin
     And I am on the "Test" "enrolment methods" page
     And I should see "Course credit enrolment (Student)" in the "generaltable" "table"
-    And "Disable" "icon" should exist in the "Course credit enrolment (Student)" "table_row"
+    And "Disable" "link" should exist in the "Course credit enrolment (Student)" "table_row"
     And I click on "Edit" "link" in the "Course credit enrolment (Student)" "table_row"
     And I set the field "Credit cost" to "20"
     And I set the following fields to these values:

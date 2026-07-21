@@ -32,7 +32,6 @@ namespace enrol_credit;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class deleteselectedusers_operation extends \enrol_bulk_enrolment_operation {
-
     /**
      * Returns the title to display for this bulk operation.
      *

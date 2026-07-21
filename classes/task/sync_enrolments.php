@@ -28,7 +28,6 @@ namespace enrol_credit\task;
  * Sync enrolments task.
  */
 class sync_enrolments extends \core\task\scheduled_task {
-
     /**
      * Name for this task.
      *
@@ -46,5 +45,4 @@ class sync_enrolments extends \core\task\scheduled_task {
         $trace = new \text_progress_trace();
         $enrol->sync($trace);
     }
-
 }

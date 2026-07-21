@@ -22,9 +22,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
-require_once("$CFG->libdir/externallib.php");
+use core_external\external_api;
+use core_external\external_function_parameters;
+use core_external\external_multiple_structure;
+use core_external\external_single_structure;
+use core_external\external_value;
+use core_external\external_warnings;
 
 /**
  * credit enrolment external functions.
@@ -35,7 +38,6 @@ require_once("$CFG->libdir/externallib.php");
  * @since     Moodle 2.6
  */
 class enrol_credit_external extends external_api {
-
     /**
      * Returns description of get_instance_info() parameters.
      *
@@ -43,8 +45,8 @@ class enrol_credit_external extends external_api {
      */
     public static function get_instance_info_parameters() {
         return new external_function_parameters(
-                ['instanceid' => new external_value(PARAM_INT, 'instance id of credit enrolment plugin.')]
-            );
+            ['instanceid' => new external_value(PARAM_INT, 'instance id of credit enrolment plugin.')]
+        );
     }
 
     /**
@@ -76,10 +78,6 @@ class enrol_credit_external extends external_api {
         }
 
         $instanceinfo = (array) $enrolplugin->get_enrol_info($enrolinstance);
-        if (isset($instanceinfo['requiredparam']->enrolpassword)) {
-            $instanceinfo['enrolpassword'] = $instanceinfo['requiredparam']->enrolpassword;
-        }
-        unset($instanceinfo->requiredparam);
 
         return $instanceinfo;
     }
@@ -129,16 +127,18 @@ class enrol_credit_external extends external_api {
      * @throws moodle_exception
      */
     public static function enrol_user($courseid, $password = '', $instanceid = 0) {
-        global $CFG;
+        global $CFG, $USER;
 
         require_once($CFG->libdir . '/enrollib.php');
 
-        $params = self::validate_parameters(self::enrol_user_parameters(),
-                                            [
-                                                'courseid' => $courseid,
-                                                'password' => $password,
-                                                'instanceid' => $instanceid,
-                                            ]);
+        $params = self::validate_parameters(
+            self::enrol_user_parameters(),
+            [
+                'courseid' => $courseid,
+                'password' => $password,
+                'instanceid' => $instanceid,
+            ]
+        );
 
         $warnings = [];
 
@@ -170,7 +170,6 @@ class enrol_credit_external extends external_api {
                 } else {
                     $instances[] = $courseenrolinstance;
                 }
-
             }
         }
         if (empty($instances)) {
@@ -180,48 +179,10 @@ class enrol_credit_external extends external_api {
         // Try to enrol the user in the instance/s.
         $enrolled = false;
         foreach ($instances as $instance) {
-            $enrolstatus = $enrol->can_credit_enrol($instance);
+            $enrolstatus = $enrol->can_self_enrol($instance);
             if ($enrolstatus === true) {
-                if ($instance->password && $params['password'] !== $instance->password) {
-
-                    // Check if we are using group enrolment keys.
-                    if ($instance->customint1) {
-                        require_once($CFG->dirroot . "/enrol/credit/locallib.php");
-
-                        if (!enrol_credit_check_group_enrolment_key($course->id, $params['password'])) {
-                            $warnings[] = [
-                                'item' => 'instance',
-                                'itemid' => $instance->id,
-                                'warningcode' => '2',
-                                'message' => get_string('passwordinvalid', 'enrol_credit'),
-                            ];
-                            continue;
-                        }
-                    } else {
-                        if ($enrol->get_config('showhint')) {
-                            $hint = core_text::substr($instance->password, 0, 1);
-                            $warnings[] = [
-                                'item' => 'instance',
-                                'itemid' => $instance->id,
-                                'warningcode' => '3',
-                                'message' => s(get_string('passwordinvalidhint', 'enrol_credit', $hint)), // Message is PARAM_TEXT.
-                            ];
-                            continue;
-                        } else {
-                            $warnings[] = [
-                                'item' => 'instance',
-                                'itemid' => $instance->id,
-                                'warningcode' => '4',
-                                'message' => get_string('passwordinvalid', 'enrol_credit'),
-                            ];
-                            continue;
-                        }
-                    }
-                }
-
-                // Do the enrolment.
-                $data = ['enrolpassword' => $params['password']];
-                $enrol->enrol_credit($instance, (object) $data);
+                // Do the enrolment, deducting the credit cost from the user.
+                $enrol->enrol_self($instance, $USER);
                 $enrolled = true;
                 break;
             } else {
@@ -289,8 +250,10 @@ class enrol_credit_external extends external_api {
 
         require_once($CFG->dirroot . '/enrol/credit/lib.php');
 
-        $params = self::validate_parameters(self::credit_users_parameters(),
-                ['credits' => $coursecredits]);
+        $params = self::validate_parameters(
+            self::credit_users_parameters(),
+            ['credits' => $coursecredits]
+        );
 
         foreach ($coursecredits as $coursecredit) {
             enrol_credit_plugin::add_credits($coursecredit['userid'], $coursecredit['credit'] * $coursecredit['quantity']);

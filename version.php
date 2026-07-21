@@ -24,8 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2025042600; // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2016120509; // Requires this Moodle version.
+$plugin->version   = 2026072000; // The current plugin version (Date: YYYYMMDDXX).
+$plugin->requires  = 2025041400; // Requires this Moodle version (5.0).
+$plugin->supported = [500, 502]; // Supports Moodle 5.0 to 5.2.
 $plugin->component = 'enrol_credit'; // Full name of the plugin (used for diagnostics).
-$plugin->release   = '1.2';
+$plugin->release   = '1.3';
 $plugin->maturity = MATURITY_STABLE;

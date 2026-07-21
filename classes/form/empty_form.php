@@ -28,7 +28,7 @@ namespace enrol_credit\form;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir.'/formslib.php');
+require_once($CFG->libdir . '/formslib.php');
 
 /**
  * Display the warning message to the user about their credits.

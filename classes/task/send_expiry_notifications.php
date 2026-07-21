@@ -28,7 +28,6 @@ namespace enrol_credit\task;
  * Send expiry notifications task.
  */
 class send_expiry_notifications extends \core\task\scheduled_task {
-
     /**
      * Name for this task.
      *
@@ -46,5 +45,4 @@ class send_expiry_notifications extends \core\task\scheduled_task {
         $trace = new \text_progress_trace();
         $enrol->send_expiry_notifications($trace);
     }
-
 }

@@ -71,7 +71,7 @@ Feature: Credit enrolment general settings
     And I press "Save and display"
     And I am on the "Credit enrol test" "enrolment methods" page
     And I should see "Course credit enrolment (Student)" in the "generaltable" "table"
-    And "Enable" "icon" should exist in the "Course credit enrolment (Student)" "table_row"
+    And "Enable" "link" should exist in the "Course credit enrolment (Student)" "table_row"
     And I navigate to "Plugins > Enrolments > Course credit enrolment" in site administration
     And I set the field "Allow existing enrolments" to "Yes"
     And I press "Save changes"
@@ -84,7 +84,7 @@ Feature: Credit enrolment general settings
     And I press "Save and display"
     And I am on the "Credit enrol test 1" "enrolment methods" page
     And I should see "Course credit enrolment (Student)" in the "generaltable" "table"
-    And "Disable" "icon" should exist in the "Course credit enrolment (Student)" "table_row"
+    And "Disable" "link" should exist in the "Course credit enrolment (Student)" "table_row"
     And I log out
 
   @javascript
@@ -103,7 +103,7 @@ Feature: Credit enrolment general settings
     And I press "Save and display"
     And I am on the "Credit enrolment test" "enrolment methods" page
     And I should see "Course credit enrolment (Teacher)" in the "generaltable" "table"
-    And "Disable" "icon" should exist in the "Course credit enrolment (Teacher)" "table_row"
+    And "Disable" "link" should exist in the "Course credit enrolment (Teacher)" "table_row"
     And I click on "Edit" "link" in the "Course credit enrolment (Teacher)" "table_row"
     And the field "Default assigned role" matches value "Teacher"
     And I press "Save changes"
@@ -134,7 +134,7 @@ Feature: Credit enrolment general settings
     And I press "Save and display"
     And I am on the "Credit enrolment test" "enrolment methods" page
     And I should see "Course credit enrolment (Student)" in the "generaltable" "table"
-    And "Disable" "icon" should exist in the "Course credit enrolment (Student)" "table_row"
+    And "Disable" "link" should exist in the "Course credit enrolment (Student)" "table_row"
     And I click on "Edit" "link" in the "Course credit enrolment (Student)" "table_row"
     Then the following fields match these values:
       | enrolperiod[number]   | 1       |
@@ -172,7 +172,7 @@ Feature: Credit enrolment general settings
     And I press "Save and display"
     And I am on the "Credit enrolment test" "enrolment methods" page
     And I should see "Course credit enrolment (Student)" in the "generaltable" "table"
-    And "Disable" "icon" should exist in the "Course credit enrolment (Student)" "table_row"
+    And "Disable" "link" should exist in the "Course credit enrolment (Student)" "table_row"
     And I click on "Edit" "link" in the "Course credit enrolment (Student)" "table_row"
     And the field "Max enrolled users" matches value "1"
     And I log out

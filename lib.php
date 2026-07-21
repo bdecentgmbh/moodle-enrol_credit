@@ -31,7 +31,6 @@ use enrol_credit\form\empty_form;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class enrol_credit_plugin extends enrol_plugin {
-
     /**
      * Enroller instance data.
      *
@@ -806,15 +805,17 @@ class enrol_credit_plugin extends enrol_plugin {
         $mform->addHelpButton('customint3', 'maxenrolled', 'enrol_credit');
         $mform->setType('customint3', PARAM_INT);
 
-        require_once($CFG->dirroot.'/cohort/lib.php');
+        require_once($CFG->dirroot . '/cohort/lib.php');
 
         $cohorts = [0 => get_string('no')];
         $allcohorts = cohort_get_available_cohorts($context, 0, 0, 0);
         if ($instance->customint5 && !isset($allcohorts[$instance->customint5])) {
-            $c = $DB->get_record('cohort',
-                                 ['id' => $instance->customint5],
-                                 'id, name, idnumber, contextid, visible',
-                                 IGNORE_MISSING);
+            $c = $DB->get_record(
+                'cohort',
+                ['id' => $instance->customint5],
+                'id, name, idnumber, contextid, visible',
+                IGNORE_MISSING
+            );
             if ($c) {
                 // Current cohort was not found because current user can not see it. Still keep it.
                 $allcohorts[$instance->customint5] = $c;
@@ -823,7 +824,7 @@ class enrol_credit_plugin extends enrol_plugin {
         foreach ($allcohorts as $c) {
             $cohorts[$c->id] = format_string($c->name, true, ['context' => context::instance_by_id($c->contextid)]);
             if ($c->idnumber) {
-                $cohorts[$c->id] .= ' ['.s($c->idnumber).']';
+                $cohorts[$c->id] .= ' [' . s($c->idnumber) . ']';
             }
         }
         if ($instance->customint5 && !isset($allcohorts[$instance->customint5])) {
@@ -839,8 +840,12 @@ class enrol_credit_plugin extends enrol_plugin {
             $mform->setConstant('customint5', 0);
         }
 
-        $mform->addElement('select', 'customint4', get_string('sendcoursewelcomemessage', 'enrol_credit'),
-                enrol_send_welcome_email_options());
+        $mform->addElement(
+            'select',
+            'customint4',
+            get_string('sendcoursewelcomemessage', 'enrol_credit'),
+            enrol_send_welcome_email_options()
+        );
         $mform->addHelpButton('customint4', 'sendcoursewelcomemessage', 'enrol_credit');
 
         $options = ['cols' => '60', 'rows' => '8'];
@@ -930,7 +935,7 @@ class enrol_credit_plugin extends enrol_plugin {
      * @throws \coding_exception
      * @since 1.0
      */
-    public function add_instance($course, array $fields = null) {
+    public function add_instance($course, ?array $fields = null) {
         // In the form we are representing 2 db columns with one field.
         if (!empty($fields) && !empty($fields['expirynotify'])) {
             if ($fields['expirynotify'] == 2) {
@@ -1009,15 +1014,25 @@ class enrol_credit_plugin extends enrol_plugin {
             $rusers = [];
             if (!empty($CFG->coursecontact)) {
                 $croles = explode(',', $CFG->coursecontact);
-                list($sort, $sortparams) = users_order_by_sql('u');
+                [$sort, $sortparams] = users_order_by_sql('u');
                 // We only use the first user.
                 $i = 0;
                 do {
                     $userfields = \core_user\fields::for_name()->with_identity($context);
                     $userfieldssql = $userfields->get_sql('u');
-                    $rusers = get_role_users($croles[$i], $context, true,
+                    $rusers = get_role_users(
+                        $croles[$i],
+                        $context,
+                        true,
                         'u.id, u.confirmed, u.username' . $userfieldssql->selects . ', u.email, r.sortorder, ra.id',
-                        'r.sortorder, ra.id ASC, ' . $sort, null, '', '', '', '', $sortparams);
+                        'r.sortorder, ra.id ASC, ' . $sort,
+                        null,
+                        '',
+                        '',
+                        '',
+                        '',
+                        $sortparams
+                    );
                     $i++;
                 } while (empty($rusers) && !empty($croles[$i]));
             }
@@ -1026,7 +1041,7 @@ class enrol_credit_plugin extends enrol_plugin {
             }
         } else if ($sendoption == ENROL_SEND_EMAIL_FROM_KEY_HOLDER) {
             // Send as the first user with enrol/credit:holdkey capability assigned in the course.
-            list($sort) = users_order_by_sql('u');
+            [$sort] = users_order_by_sql('u');
             $keyholders = get_users_by_capability($context, 'enrol/credit:holdkey', 'u.*', $sort);
             if (!empty($keyholders)) {
                 $contact = array_values($keyholders)[0];
@@ -1077,7 +1092,6 @@ class enrol_credit_plugin extends enrol_plugin {
 
         $field = get_config('enrol_credit', 'credit_field');
         if ($DB->record_exists('user_info_data', ['userid' => $userid, 'fieldid' => $field])) {
-
             $data = $DB->get_record('user_info_data', [ 'userid' => $userid, 'fieldid' => $field], '*', MUST_EXIST);
             $data->data = intval($data->data) - $amount;
 
@@ -1095,9 +1109,11 @@ class enrol_credit_plugin extends enrol_plugin {
     public static function add_credits($userid, $credits) {
         global $DB;
 
-        if (!$data = $DB->get_record('user_info_data', [
+        if (
+            !$data = $DB->get_record('user_info_data', [
                 'userid' => $userid,
-                'fieldid' => get_config('enrol_credit', 'credit_field')])) {
+                'fieldid' => get_config('enrol_credit', 'credit_field')])
+        ) {
             $data = new \stdClass();
             $data->fieldid = get_config('enrol_credit', 'credit_field');
             $data->userid = $userid;
