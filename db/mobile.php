@@ -33,6 +33,12 @@ $addons = [
                 'delegate' => 'CoreEnrolDelegate',
                 'enrolmentAction' => 'self',
                 'method' => 'mobile_enrol',
+                'infoIcons' => [
+                    [
+                        'icon' => 'fas-coins',
+                        'label' => 'plugin.enrol_credit.pluginname',
+                    ],
+                ],
             ],
         ],
         'lang' => [

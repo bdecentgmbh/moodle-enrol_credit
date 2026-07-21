@@ -50,19 +50,10 @@ const creditEnrol = (courseId) => {
     });
 };
 
+// Note: getInfoIcons is not overridden here on purpose. The static "infoIcons"
+// declared in db/mobile.php are used by the app's default handler, which avoids
+// depending on services that are not exposed to site plugin JavaScript.
 var result = {
-    getInfoIcons: (courseId) => {
-        return this.CoreEnrolService.getSupportedCourseEnrolmentMethods(courseId, 'credit').then((enrolments) => {
-            if (!enrolments.length) {
-                return [];
-            }
-            return [{
-                label: 'plugin.enrol_credit.pluginname',
-                icon: 'fas-coins',
-            }];
-        });
-    },
-
     enrol: (method) => {
         return getEnrolmentInfo(method.id).then((info) => {
             if (info.status !== true) {
